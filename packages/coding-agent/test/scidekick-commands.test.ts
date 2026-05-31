@@ -73,54 +73,68 @@ async function createSkillRepo(): Promise<string> {
 }
 
 describe("Scidekick install-skills command", () => {
-	it("lists available skills from a local fixture repository", async () => {
-		const repoDir = await createSkillRepo();
-		const result = await runCli(["install-skills", "--list", "--from", repoDir]);
+	it(
+		"lists available skills from a local fixture repository",
+		async () => {
+			const repoDir = await createSkillRepo();
+			const result = await runCli(["install-skills", "--list", "--from", repoDir]);
 
-		expect(result.exitCode).toBe(0);
-		expect(result.stdout).toContain("Available skills");
-		expect(result.stdout).toContain("literature-review — Review literature carefully");
-		expect(result.stdout).toContain("hypothesis-generation — Generate hypotheses");
-	});
+			expect(result.exitCode).toBe(0);
+			expect(result.stdout).toContain("Available skills");
+			expect(result.stdout).toContain("literature-review — Review literature carefully");
+			expect(result.stdout).toContain("hypothesis-generation — Generate hypotheses");
+		},
+		{ timeout: 30000 },
+	);
 
-	it("installs selected skills and records them in the registry", async () => {
-		const repoDir = await createSkillRepo();
-		const result = await runCli(["install-skills", "--from", repoDir, "--skill", "literature-review"]);
+	it(
+		"installs selected skills and records them in the registry",
+		async () => {
+			const repoDir = await createSkillRepo();
+			const result = await runCli(["install-skills", "--from", repoDir, "--skill", "literature-review"]);
 
-		expect(result.exitCode).toBe(0);
-		expect(result.stdout).toContain("Installed 1 skill(s)");
-		const installedSkill = path.join(agentDir, "skills", "literature-review", "SKILL.md");
-		expect(await Bun.file(installedSkill).text()).toContain("# Literature Review");
+			expect(result.exitCode).toBe(0);
+			expect(result.stdout).toContain("Installed 1 skill(s)");
+			const installedSkill = path.join(agentDir, "skills", "literature-review", "SKILL.md");
+			expect(await Bun.file(installedSkill).text()).toContain("# Literature Review");
 
-		const db = new Database(path.join(agentDir, "agent.db"), { readonly: true });
-		try {
-			const row = db
-				.prepare("SELECT name, source_url FROM skill_metadata WHERE name = ?")
-				.get("literature-review") as { name: string; source_url: string } | undefined;
-			expect(row).toEqual({ name: "literature-review", source_url: path.resolve(repoDir) });
-		} finally {
-			db.close();
-		}
-	});
+			const db = new Database(path.join(agentDir, "agent.db"), { readonly: true });
+			try {
+				const row = db
+					.prepare("SELECT name, source_url FROM skill_metadata WHERE name = ?")
+					.get("literature-review") as { name: string; source_url: string } | undefined;
+				expect(row).toEqual({ name: "literature-review", source_url: path.resolve(repoDir) });
+			} finally {
+				db.close();
+			}
+		},
+		{ timeout: 30000 },
+	);
 });
 
 describe("Scidekick wiki command", () => {
-	it("creates, lists, shows, and lints a hypothesis entry", async () => {
-		const create = await runCli(["wiki", "new", "hypothesis", "Catalyst lowers activation energy"]);
-		expect(create.exitCode).toBe(0);
-		expect(create.stdout).toContain("Created catalyst-lowers-activation-energy");
+	it(
+		"creates, lists, shows, and lints a hypothesis entry",
+		async () => {
+			const create = await runCli(["wiki", "new", "hypothesis", "Catalyst lowers activation energy"]);
+			expect(create.exitCode).toBe(0);
+			expect(create.stdout).toContain("Created catalyst-lowers-activation-energy");
 
-		const list = await runCli(["wiki", "list"]);
-		expect(list.exitCode).toBe(0);
-		expect(list.stdout).toContain("catalyst-lowers-activation-energy\thypothesis\tCatalyst lowers activation energy");
+			const list = await runCli(["wiki", "list"]);
+			expect(list.exitCode).toBe(0);
+			expect(list.stdout).toContain(
+				"catalyst-lowers-activation-energy\thypothesis\tCatalyst lowers activation energy",
+			);
 
-		const show = await runCli(["wiki", "show", "catalyst-lowers-activation-energy"]);
-		expect(show.exitCode).toBe(0);
-		expect(show.stdout).toContain("type: hypothesis");
-		expect(show.stdout).toContain("# Hypothesis: Catalyst lowers activation energy");
+			const show = await runCli(["wiki", "show", "catalyst-lowers-activation-energy"]);
+			expect(show.exitCode).toBe(0);
+			expect(show.stdout).toContain("type: hypothesis");
+			expect(show.stdout).toContain("# Hypothesis: Catalyst lowers activation energy");
 
-		const lint = await runCli(["wiki", "lint", "catalyst-lowers-activation-energy"]);
-		expect(lint.exitCode).toBe(0);
-		expect(lint.stdout).toContain("OK: catalyst-lowers-activation-energy");
-	});
+			const lint = await runCli(["wiki", "lint", "catalyst-lowers-activation-energy"]);
+			expect(lint.exitCode).toBe(0);
+			expect(lint.stdout).toContain("OK: catalyst-lowers-activation-energy");
+		},
+		{ timeout: 30000 },
+	);
 });

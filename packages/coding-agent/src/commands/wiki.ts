@@ -1,5 +1,6 @@
 import { APP_NAME } from "@oh-my-pi/pi-utils";
 import { Args, Command } from "@oh-my-pi/pi-utils/cli";
+import { getScientificCommandTierWarning } from "../scidekick/command-tier-warning";
 import { FilesystemWikiBackend, type WikiEntityType } from "../scidekick/wiki-backend";
 
 const WIKI_ACTIONS = ["new", "list", "show", "lint"] as const;
@@ -40,21 +41,26 @@ export default class Wiki extends Command {
 			process.stdout.write(`Usage: ${APP_NAME} wiki <${WIKI_ACTIONS.join("|")}> ...\n`);
 			return;
 		}
-
 		const backend = new FilesystemWikiBackend();
 		switch (action) {
 			case "list":
 				await this.#list(backend);
-				return;
+				break;
 			case "new":
 				await this.#create(backend, args.first, args.second);
-				return;
+				break;
 			case "show":
 				await this.#show(backend, args.first);
-				return;
+				break;
 			case "lint":
 				await this.#lint(backend, args.first);
-				return;
+				break;
+		}
+		if (process.exitCode !== 1) {
+			const scienceTierWarning = await getScientificCommandTierWarning("wiki");
+			if (scienceTierWarning) {
+				process.stderr.write(`Warning: ${scienceTierWarning}\n`);
+			}
 		}
 	}
 

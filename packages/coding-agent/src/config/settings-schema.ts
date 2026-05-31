@@ -706,6 +706,41 @@ export const SETTINGS_SCHEMA = {
 		},
 	},
 
+	minScienceModelTier: {
+		type: "enum",
+		values: ["haiku", "sonnet", "opus"] as const,
+		default: "sonnet",
+		ui: {
+			tab: "model",
+			label: "Minimum Science Model Tier",
+			description: "Lowest model tier allowed for scientific workflows",
+			options: [
+				{ value: "haiku", label: "Haiku", description: "Allow lightweight models" },
+				{ value: "sonnet", label: "Sonnet", description: "Recommended default for scientific work" },
+				{ value: "opus", label: "Opus", description: "Require frontier-tier models" },
+			],
+		},
+	},
+
+	scienceTierEnforcement: {
+		type: "enum",
+		values: ["warn", "block"] as const,
+		default: "warn",
+		ui: {
+			tab: "model",
+			label: "Science Tier Enforcement",
+			description: "Warn or block when a scientific workflow uses a model below the configured minimum tier",
+			options: [
+				{ value: "warn", label: "Warn", description: "Show an advisory and continue" },
+				{
+					value: "block",
+					label: "Block",
+					description: "Refuse to continue scientific sessions below the minimum tier",
+				},
+			],
+		},
+	},
+
 	// Sampling
 	temperature: {
 		type: "number",
