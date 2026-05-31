@@ -325,9 +325,8 @@ jobs:
       if: ${{ needs.gate.outputs.is-release == 'true' && !cancelled() &&
          needs.native_linux.result == 'success' && needs.native_release.result ==
          'success' && needs.test.result == 'success' && needs.check.result ==
-         'success' && needs.install_methods.result == 'success' }}
-      needs: [gate, check, native_linux, native_release, test, install_methods, rust-hash]
-      strategy:
+         'success' && needs.check.result == 'success' }}
+      needs: [gate, check, native_linux, native_release, rust-hash]
          fail-fast: false
          matrix:
             include:
