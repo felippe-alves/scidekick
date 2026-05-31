@@ -124,7 +124,7 @@ export async function executeBash(command: string, options?: BashExecutorOptions
 	}
 
 	let shellSession = persistentSessionBroken ? undefined : shellSessions.get(sessionKey);
-	if (!shellSession && !persistentSessionBroken) {
+	if (!shellSession) {
 		shellSession = new Shell({
 			sessionEnv: shellEnv,
 			snapshotPath: snapshotPath ?? undefined,
