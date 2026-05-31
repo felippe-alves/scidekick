@@ -1,6 +1,6 @@
 {
 	"type": "module",
-	"name": "@scidekick/pi-utils",
+	"name": "@oh-my-pi/pi-utils",
 	"version": "15.7.3",
 	"description": "Shared utilities for pi packages",
 	"homepage": "https://omp.sh",
@@ -31,7 +31,7 @@
 		"fmt": "biome format --write ."
 	},
 	"dependencies": {
-		"@scidekick/pi-natives": "catalog:",
+		"@oh-my-pi/pi-natives": "catalog:",
 		"beautiful-mermaid": "catalog:",
 		"handlebars": "catalog:",
 		"winston": "catalog:",

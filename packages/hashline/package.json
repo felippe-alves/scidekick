@@ -1,6 +1,6 @@
 {
 	"type": "module",
-	"name": "@scidekick/hashline",
+	"name": "@oh-my-pi/hashline",
 	"version": "15.7.3",
 	"description": "Hashline: a compact, line-anchored patch language and applier. Pluggable FS/IO so it works over disk, in-memory, or any custom backend.",
 	"homepage": "https://omp.sh",

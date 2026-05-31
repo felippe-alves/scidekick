@@ -1,6 +1,6 @@
 {
 	"type": "module",
-	"name": "@scidekick/pi-ai",
+	"name": "@oh-my-pi/pi-ai",
 	"version": "15.7.3",
 	"description": "Unified LLM API with automatic model discovery and provider configuration",
 	"homepage": "https://omp.sh",
@@ -40,7 +40,7 @@
 	"dependencies": {
 		"@anthropic-ai/sdk": "catalog:",
 		"@bufbuild/protobuf": "catalog:",
-		"@scidekick/pi-utils": "catalog:",
+		"@oh-my-pi/pi-utils": "catalog:",
 		"openai": "catalog:",
 		"partial-json": "catalog:",
 		"zod": "catalog:"

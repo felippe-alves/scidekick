@@ -1,7 +1,7 @@
 {
 	"type": "module",
 	"private": true,
-	"name": "@scidekick/typescript-edit-benchmark",
+	"name": "@oh-my-pi/typescript-edit-benchmark",
 	"version": "0.0.1",
 	"description": "Edit benchmark suite using TypeScript source code mutations",
 	"author": "Can Boluk",
@@ -30,15 +30,15 @@
 		"@babel/parser": "catalog:",
 		"@babel/traverse": "catalog:",
 		"@babel/types": "catalog:",
-		"@scidekick/hashline": "catalog:",
-		"@scidekick/pi-agent-core": "catalog:",
-		"@scidekick/pi-coding-agent": "catalog:",
-		"@scidekick/pi-utils": "catalog:",
+		"@oh-my-pi/hashline": "catalog:",
+		"@oh-my-pi/pi-agent-core": "catalog:",
+		"@oh-my-pi/pi-coding-agent": "catalog:",
+		"@oh-my-pi/pi-utils": "catalog:",
 		"diff": "catalog:",
 		"prettier": "catalog:",
 		"regexp-tree": "catalog:",
-		"@scidekick/pi-ai": "catalog:",
-		"@scidekick/pi-tui": "catalog:"
+		"@oh-my-pi/pi-ai": "catalog:",
+		"@oh-my-pi/pi-tui": "catalog:"
 	},
 	"devDependencies": {
 		"@types/babel__generator": "catalog:",

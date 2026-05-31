@@ -3,7 +3,7 @@
   "configVersion": 1,
   "workspaces": {
     "": {
-      "name": "omp-monorepo",
+      "name": "scidekick",
       "devDependencies": {
         "@biomejs/biome": "catalog:",
         "@types/bun": "catalog:",
@@ -118,6 +118,18 @@
         "@napi-rs/cli": "catalog:",
         "@types/bun": "catalog:",
       },
+    },
+    "packages/scidekick-guard": {
+      "name": "@scidekick/guard",
+      "version": "1.0.0",
+    },
+    "packages/scidekick-science": {
+      "name": "@scidekick/science",
+      "version": "1.0.0",
+    },
+    "packages/scidekick-skills": {
+      "name": "@scidekick/skills",
+      "version": "1.0.0",
     },
     "packages/stats": {
       "name": "@oh-my-pi/omp-stats",
@@ -718,6 +730,12 @@
     "@rolldown/binding-win32-x64-msvc": ["@rolldown/binding-win32-x64-msvc@1.0.2", "", { "os": "win32", "cpu": "x64" }, "sha512-v7qRI7gXLRINcOGXt+7YmAZ6iFuyZVMIoXAxhd8oP+DR9dLfL9GfNIx7PLMxmhZdvq8waUJBQiWN9EKNy+TRBQ=="],
 
     "@rolldown/pluginutils": ["@rolldown/pluginutils@1.0.1", "", {}, "sha512-2j9bGt5Jh8hj+vPtgzPtl72j0yRxHAyumoo6TNfAjsLB04UtpSvPbPcDcBMxz7n+9CYB0c1GxQFxYRg2jimqGw=="],
+
+    "@scidekick/guard": ["@scidekick/guard@workspace:packages/scidekick-guard"],
+
+    "@scidekick/science": ["@scidekick/science@workspace:packages/scidekick-science"],
+
+    "@scidekick/skills": ["@scidekick/skills@workspace:packages/scidekick-skills"],
 
     "@so-ric/colorspace": ["@so-ric/colorspace@1.1.6", "", { "dependencies": { "color": "^5.0.2", "text-hex": "1.0.x" } }, "sha512-/KiKkpHNOBgkFJwu9sh48LkHSMYGyuTcSFK/qMBdnOAlrRJzRSXAOFB5qwzaVQuDl8wAvHVMkaASQDReTahxuw=="],
 
