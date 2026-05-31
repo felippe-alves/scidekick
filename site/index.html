@@ -1,0 +1,939 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="color-scheme" content="light">
+<meta name="theme-color" content="#ffffff">
+<title>Scidekick — AI Research Catalyst</title>
+<meta name="description" content="An open-source AI research harness. Execute experiments, manage a scientific wiki, and orchestrate agent teams — all from the terminal.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230b0a14'/%3E%3Ctext x='32' y='44' text-anchor='middle' font-size='36' fill='%237C5CFC'%3E%E2%97%89%3C/text%3E%3C/svg%3E">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<style>
+/* ── Reset ── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+/* ── Tokens ── */
+:root {
+  --bg:       #ffffff;
+  --paper:    #ffffff;
+  --ink:      #111111;
+  --muted:    #626262;
+  --line:     #d4d4cc;
+  --accent:   #7b8f45;
+
+  /* legacy aliases for backward compat */
+  --violet:       #7b8f45;
+  --violet-dim:   #5c6e30;
+  --violet-glow:  #a0b35a;
+  --teal:         #7b8f45;
+  --teal-dim:     #5c6e30;
+  --amber:        #a0b35a;
+  --amber-glow:   #b8cc6e;
+
+  --ink-950: #ffffff;
+  --ink-900: #ffffff;
+  --ink-800: #f5f5f3;
+  --ink-700: #eaeae6;
+  --ink-600: #d4d4cc;
+
+  --fg:       #111111;
+  --fg-dim:   #626262;
+  --fg-faint: #999990;
+  --rule:     #d4d4cc;
+
+  --font-sans:    'Space Grotesk', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-mono:    'IBM Plex Mono', Menlo, Consolas, monospace;
+  --font-display: 'Space Grotesk', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+
+html {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  scroll-behavior: smooth;
+  font-size: 16px;
+  line-height: 1.45;
+}
+
+body {
+  background: var(--bg);
+  min-height: 100vh;
+}
+
+/* ── Grid texture ── */
+.grid-bg {
+  background-image:
+    linear-gradient(rgba(212,212,204,0.5) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(212,212,204,0.5) 1px, transparent 1px);
+  background-size: 48px 48px;
+}
+
+/* ── Typography ── */
+.display {
+  font-family: var(--font-display);
+  font-weight: 700;
+  line-height: 0.95;
+  letter-spacing: -0.035em;
+  text-transform: uppercase;
+}
+.display em { font-style: italic; color: var(--muted); }
+
+h2 {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: clamp(1.5rem, 1.2rem + 1.2vw, 2.4rem);
+  line-height: 1.08;
+  letter-spacing: -0.025em;
+}
+h2 em { font-style: italic; color: var(--muted); }
+
+h3 {
+  font-family: var(--font-sans);
+  font-weight: 600;
+  font-size: 14px;
+  line-height: 1.3;
+  letter-spacing: -0.01em;
+  color: var(--ink);
+}
+
+p { color: var(--muted); }
+a { color: var(--accent); text-decoration: none; transition: color 120ms; }
+a:hover { color: var(--ink); }
+code { font-family: var(--font-mono); font-size: 0.9em; }
+
+.mono { font-family: var(--font-mono); }
+.label {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.22em;
+  color: var(--fg-faint);
+}
+.accent-label {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.22em;
+  color: var(--accent);
+}
+
+/* ── Layout ── */
+.wrap { max-width: 1280px; margin: 0 auto; padding: 0 24px; }
+@media (min-width: 640px) { .wrap { padding: 0 32px; } }
+
+/* ── Hairlines ── */
+.hl { border-color: var(--rule); }
+hr { border: none; border-top: 1px solid var(--rule); }
+
+/* ── Nav ── */
+nav {
+  position: fixed; inset-x: 0; top: 0; z-index: 40;
+  height: 56px;
+  display: flex; align-items: center;
+  background: rgba(255,255,255,0.90);
+  backdrop-filter: blur(12px) saturate(180%);
+  -webkit-backdrop-filter: blur(12px) saturate(180%);
+  border-bottom: 1px solid var(--line);
+  transition: background 300ms;
+}
+.nav-inner {
+  display: flex; align-items: center; justify-content: space-between;
+  width: 100%; gap: 48px;
+}
+.nav-brand {
+  display: flex; align-items: center; gap: 8px;
+  font-weight: 700; font-size: 15px; letter-spacing: -0.02em;
+  color: var(--ink); flex-shrink: 0;
+}
+.nav-brand .glyph { color: var(--accent); font-size: 18px; }
+.nav-links {
+  display: none; align-items: center; gap: 40px;
+  font-family: var(--font-mono);
+  font-size: 11px; text-transform: uppercase; letter-spacing: 0.18em;
+  color: var(--muted);
+}
+@media (min-width: 768px) { .nav-links { display: flex; } }
+.nav-links a { color: var(--muted); transition: color 120ms; }
+.nav-links a:hover { color: var(--ink); }
+.nav-cta {
+  display: inline-flex; align-items: center;
+  background: var(--violet); color: #fff; border-radius: 6px;
+  padding: 6px 14px; font-size: 12px; font-weight: 600;
+  letter-spacing: 0.02em; transition: background 150ms; flex-shrink: 0;
+}
+.nav-cta:hover { background: var(--violet-dim); color: #fff; }
+
+/* ── Hero ── */
+.hero {
+  position: relative; overflow: clip;
+  padding: 140px 0 0;
+}
+.hero-grid-bg {
+  position: absolute; inset: 0;
+  pointer-events: none;
+}
+.hero-grid-bg::after {
+  content: '';
+  position: absolute; inset: 0;
+  background: radial-gradient(ellipse 80% 60% at 50% 0%, rgba(255,255,255,0.8) 0%, transparent 70%),
+              radial-gradient(ellipse 100% 40% at 50% 100%, rgba(255,255,255,0.8) 0%, transparent 80%);
+}
+.hero-inner { position: relative; }
+
+.hero-eyebrow {
+  display: inline-flex; align-items: center; gap: 8px;
+  border: 1px solid var(--line); border-radius: 100px;
+  padding: 6px 14px 6px 10px;
+  font-family: var(--font-mono);
+  font-size: 11px; text-transform: uppercase; letter-spacing: 0.16em;
+  color: var(--muted);
+  margin-bottom: 28px;
+}
+.hero-eyebrow .dot { color: var(--accent); }
+
+.hero-heading {
+  font-size: clamp(2.4rem, 1.2rem + 4.5vw, 5rem);
+  max-width: 22ch;
+  margin-bottom: 20px;
+}
+
+.hero-sub {
+  font-size: clamp(1rem, 0.9rem + 0.4vw, 1.15rem);
+  line-height: 1.65;
+  max-width: 48ch;
+  margin-bottom: 32px;
+  color: var(--muted);
+}
+
+.install-row {
+  display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+.install-pill {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: #f5f5f3; border: 1px solid var(--line);
+  border-radius: 8px; padding: 10px 10px 10px 18px;
+  font-family: var(--font-mono); font-size: 13px;
+}
+.install-pill .cmd { color: var(--accent); }
+.install-pill .url { color: #5c6e30; }
+.install-btn {
+  background: var(--violet); color: #fff; border: none; border-radius: 6px;
+  padding: 8px 16px; font-size: 12px; font-weight: 600;
+  cursor: pointer; transition: background 150ms;
+}
+.install-btn:hover { background: var(--violet-dim); }
+.install-meta {
+  font-family: var(--font-mono);
+  font-size: 11px; color: var(--fg-faint);
+  letter-spacing: 0.06em;
+  display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+}
+.install-meta a { color: var(--fg-faint); }
+.install-meta a:hover { color: var(--accent); }
+.sep { color: var(--ink-600); }
+
+/* ── Stats row (omp-style bordered grid) ── */
+.stats-block {
+  margin-top: 56px;
+  border-top: 1px solid var(--rule);
+  border-bottom: 1px solid var(--rule);
+}
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  font-family: var(--font-mono);
+}
+@media (max-width: 640px) {
+  .stats-grid { grid-template-columns: repeat(2, 1fr); }
+}
+.stat-cell {
+  padding: 20px 20px 20px 0;
+  border-right: 1px solid var(--rule);
+}
+.stat-cell:last-child { border-right: none; }
+@media (min-width: 641px) {
+  .stat-cell { padding: 24px 32px 24px 0; }
+  .stat-cell:first-child { padding-left: 0; }
+}
+.stat-num {
+  font-size: clamp(1.6rem, 1.2rem + 1.2vw, 2.4rem);
+  font-weight: 700; letter-spacing: -0.04em;
+  color: var(--accent); line-height: 1;
+  margin-bottom: 4px;
+}
+.stat-label {
+  font-size: 10px; text-transform: uppercase; letter-spacing: 0.22em;
+  color: var(--fg-faint);
+}
+
+/* ── Section structure ── */
+.section {
+  padding: 80px 0;
+  border-top: 1px solid var(--rule);
+}
+@media (min-width: 640px) { .section { padding: 96px 0; } }
+
+.section-num {
+  font-family: var(--font-mono);
+  font-size: 10px; text-transform: uppercase; letter-spacing: 0.22em;
+  color: var(--accent); margin-bottom: 10px;
+  display: flex; align-items: center; gap: 10px;
+}
+.section-num::after {
+  content: ''; flex: 1; height: 1px; background: var(--rule);
+  display: none;
+}
+
+/* ── Feature layout (omp 2-col asymmetric) ── */
+.feat-grid {
+  display: grid;
+  gap: 40px 64px;
+  align-items: start;
+}
+@media (min-width: 900px) {
+  .feat-grid { grid-template-columns: minmax(0, 1.45fr) minmax(0, 1fr); }
+}
+
+.feat-body { }
+.feat-body .desc {
+  font-size: 15.5px; line-height: 1.65;
+  color: var(--fg-dim);
+  margin-top: 16px;
+  max-width: 56ch;
+}
+.feat-body .detail {
+  font-size: 14px; line-height: 1.7;
+  color: var(--fg-dim);
+  margin-top: 12px;
+  max-width: 54ch;
+}
+
+/* ── Spec sidebar (right col) ── */
+.spec-panel {
+  border-left: 1px solid var(--rule);
+  padding-left: 24px;
+  font-size: 12.5px;
+  align-self: start;
+}
+.spec-row {
+  display: flex; align-items: baseline; justify-content: space-between;
+  gap: 16px;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--line);
+}
+.spec-row:last-child { border-bottom: none; }
+.spec-key {
+  font-family: var(--font-mono);
+  font-size: 10px; text-transform: uppercase; letter-spacing: 0.18em;
+  color: var(--fg-faint); white-space: nowrap;
+}
+.spec-val {
+  color: var(--ink); text-align: right; line-height: 1.4;
+  font-size: 12px;
+}
+.spec-val a { color: var(--accent); }
+
+/* ── Code block ── */
+.code-block {
+  background: #f5f5f3; border: 1px solid var(--line);
+  border-radius: 8px; overflow: hidden;
+  font-family: var(--font-mono); font-size: 12.5px; line-height: 1.6;
+  margin-top: 20px;
+}
+.code-header {
+  display: flex; align-items: center; gap: 6px;
+  padding: 8px 14px;
+  border-bottom: 1px solid var(--line);
+  background: #eaeae6;
+}
+.dot-r { width: 10px; height: 10px; border-radius: 50%; background: #FF453A; }
+.dot-y { width: 10px; height: 10px; border-radius: 50%; background: #FFD60A; }
+.dot-g { width: 10px; height: 10px; border-radius: 50%; background: #30D158; }
+.code-body { padding: 14px 18px; overflow-x: auto; }
+.code-body .p  { color: var(--accent); }
+.code-body .c  { color: #111111; }
+.code-body .a  { color: #5c6e30; }
+.code-body .cm { color: var(--muted); }
+.code-body .ln { display: block; }
+
+/* ── Card grid ── */
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 1px;
+  background: var(--rule);
+  border: 1px solid var(--rule);
+  border-radius: 10px;
+  overflow: hidden;
+  margin-top: 28px;
+}
+.card {
+  background: var(--paper);
+  padding: 22px 24px;
+  transition: background 160ms;
+}
+.card:hover { background: #f5f5f3; }
+.card-icon {
+  font-size: 14px; color: var(--accent);
+  font-family: var(--font-mono);
+  margin-bottom: 8px; display: block;
+}
+.card h3 { margin-bottom: 5px; }
+.card p { font-size: 13px; color: var(--fg-dim); line-height: 1.55; }
+
+/* ── Scheme chips ── */
+.scheme-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(148px, 1fr));
+  gap: 1px;
+  background: var(--rule);
+  border: 1px solid var(--rule);
+  border-radius: 10px;
+  overflow: hidden;
+  margin-top: 24px;
+}
+.scheme-item {
+  background: var(--paper);
+  padding: 14px 16px;
+  font-family: var(--font-mono); font-size: 12.5px;
+  transition: background 160ms;
+}
+.scheme-item:hover { background: #f5f5f3; }
+.scheme-prefix { color: var(--violet-glow); }
+.scheme-desc {
+  display: block; font-family: var(--font-sans);
+  font-size: 11px; color: var(--fg-faint); margin-top: 3px;
+}
+
+/* ── OSS tag strip ── */
+.oss-strip {
+  display: flex; align-items: center; gap: 6px; flex-wrap: wrap;
+  margin-top: 28px;
+  font-family: var(--font-mono); font-size: 11px;
+  color: var(--fg-faint); text-transform: uppercase; letter-spacing: 0.14em;
+}
+.oss-tag {
+  border: 1px solid var(--rule); border-radius: 4px;
+  padding: 2px 8px; color: var(--fg-faint);
+}
+.oss-strip span { color: var(--ink-600); }
+
+/* ── Footer ── */
+footer {
+  padding: 48px 0;
+  border-top: 1px solid var(--line);
+  font-size: 12px; font-family: var(--font-mono);
+  color: var(--muted);
+  text-transform: uppercase; letter-spacing: 0.12em;
+}
+footer a { color: var(--muted); }
+footer a:hover { color: var(--accent); }
+.footer-inner {
+  display: flex; align-items: center; justify-content: space-between;
+  flex-wrap: wrap; gap: 16px;
+}
+.footer-brand { color: var(--ink); font-weight: 600; font-size: 13px; letter-spacing: 0; text-transform: none; }
+
+/* ── Mobile ── */
+@media (max-width: 640px) {
+  .hero { padding: 100px 0 0; }
+  .install-pill { flex-direction: column; align-items: flex-start; padding: 14px; }
+  .spec-panel { border-left: none; padding-left: 0; border-top: 1px solid var(--rule); padding-top: 20px; }
+}
+
+/* ── Animations ── */
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.fade-up { animation: fade-up 560ms cubic-bezier(0.16, 1, 0.3, 1) both; }
+.fade-up:nth-child(1) { animation-delay: 0ms; }
+.fade-up:nth-child(2) { animation-delay: 70ms; }
+.fade-up:nth-child(3) { animation-delay: 140ms; }
+.fade-up:nth-child(4) { animation-delay: 210ms; }
+.fade-up:nth-child(5) { animation-delay: 280ms; }
+.fade-up:nth-child(6) { animation-delay: 350ms; }
+@media (prefers-reduced-motion: reduce) { .fade-up { animation: none; opacity: 1; } }
+</style>
+</head>
+<body>
+
+<!-- ── Nav ── -->
+<nav>
+  <div class="wrap nav-inner">
+    <a href="#" class="nav-brand">
+      <span class="glyph">◉</span>
+      Scidekick
+    </a>
+    <div class="nav-links">
+      <a href="#experiments">Experiments</a>
+      <a href="#wiki">Wiki</a>
+      <a href="#skills">Skills</a>
+      <a href="#platform">Platform</a>
+    </div>
+    <a href="https://github.com/felippe-alves/scidekick" class="nav-cta">GitHub ↗</a>
+  </div>
+</nav>
+
+<!-- ── Hero ── -->
+<section class="hero">
+  <div class="hero-grid-bg grid-bg"></div>
+  <div class="wrap hero-inner">
+
+    <div class="fade-up">
+      <div class="hero-eyebrow">
+        <span class="dot">◉</span> Open-source · MIT · Research harness
+      </div>
+    </div>
+
+    <h1 class="display hero-heading fade-up">
+      A research agent<br><em>that does science</em><br>not chatting.
+    </h1>
+
+    <p class="hero-sub fade-up">
+      Execute experiments. Manage a scientific wiki. Orchestrate agent teams.
+      Skills that self-improve. The first open-source harness that treats
+      language models as scientific collaborators.
+    </p>
+
+    <div class="fade-up">
+      <div class="install-row">
+        <div class="install-pill">
+          <span class="cmd">curl</span>
+          <span class="url">-fsSL https://raw.githubusercontent.com/felippe-alves/scidekick/main/scripts/install.sh</span>
+          <span class="url">| sh</span>
+          <button class="install-btn" onclick="navigator.clipboard.writeText('curl -fsSL https://raw.githubusercontent.com/felippe-alves/scidekick/main/scripts/install.sh | sh')">Copy</button>
+        </div>
+      </div>
+      <div class="install-meta">
+        <span class="oss-tag">MIT</span>
+        <span class="sep">·</span>
+        <span>macOS · Linux · Windows</span>
+        <span class="sep">·</span>
+        <span>bun ≥ 1.3</span>
+        <span class="sep">·</span>
+        <a href="https://github.com/felippe-alves/scidekick">source ↗</a>
+      </div>
+    </div>
+
+    <div class="stats-block fade-up">
+      <div class="stats-grid">
+        <div class="stat-cell">
+          <div class="stat-num">40+</div>
+          <div class="stat-label">Providers</div>
+        </div>
+        <div class="stat-cell">
+          <div class="stat-num">32</div>
+          <div class="stat-label">Built-in Tools</div>
+        </div>
+        <div class="stat-cell">
+          <div class="stat-num">13</div>
+          <div class="stat-label">LSP Ops</div>
+        </div>
+        <div class="stat-cell">
+          <div class="stat-num">5</div>
+          <div class="stat-label">Wiki Entities</div>
+        </div>
+        <div class="stat-cell">
+          <div class="stat-num">~27k</div>
+          <div class="stat-label">Rust Core</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ── What makes it different ── -->
+<section class="section" id="different">
+  <div class="wrap">
+    <div class="section-num">§ 00 — What makes Scidekick different</div>
+    <div class="feat-grid">
+      <div class="feat-body">
+        <h2>A research harness,<br><em>not a coding assistant.</em></h2>
+        <p class="desc">Built on @mariozechner's Pi, adding scientific workflow orchestration, a structured wiki, self-evolving skills, and model-tier safety — everything you need to run AI-assisted research from the terminal.</p>
+      </div>
+      <div class="spec-panel">
+        <div class="spec-row">
+          <span class="spec-key">Upstream</span>
+          <span class="spec-val"><a href="https://github.com/badlogic/pi-mono">badlogic/pi-mono</a></span>
+        </div>
+        <div class="spec-row">
+          <span class="spec-key">Fork base</span>
+          <span class="spec-val"><a href="https://github.com/can1357/oh-my-pi">can1357/oh-my-pi</a></span>
+        </div>
+        <div class="spec-row">
+          <span class="spec-key">Added</span>
+          <span class="spec-val">Experiment modes · Wiki · Skill evolution · Tier guard · Validation gate</span>
+        </div>
+        <div class="spec-row">
+          <span class="spec-key">License</span>
+          <span class="spec-val">MIT</span>
+        </div>
+        <div class="spec-row">
+          <span class="spec-key">Platforms</span>
+          <span class="spec-val">macOS · Linux · Windows</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── 01 Experiment Modes ── -->
+<section class="section" id="experiments">
+  <div class="wrap">
+    <div class="section-num">§ 01 — Experiment modes</div>
+    <div class="feat-grid">
+      <div class="feat-body">
+        <h2>Loop, pipeline,<br><em>or team.</em></h2>
+        <p class="desc">One harness, three modes. Choose the level of coordination your experiment needs.</p>
+        <p class="detail"><strong style="color:var(--ink)">Loop mode</strong> — single agent, tight optimization cycle: propose → test → measure → repeat. Inspired by Karpathy's autoresearch. Good for hyperparameter sweeps, ablation studies.</p>
+        <p class="detail"><strong style="color:var(--ink)">Pipeline mode</strong> — predefined multi-step workflows with specialized agents. Fixed roles, fixed handoffs. Good for literature review, RNA-seq analysis, docking pipelines.</p>
+        <p class="detail"><strong style="color:var(--ink)">Team mode</strong> — self-organizing agent teams with discussion, critique, and queue-based work distribution. The AutoScientists pattern. Good for open-ended exploration.</p>
+      </div>
+      <div class="spec-panel">
+        <div class="spec-row">
+          <span class="spec-key">Modes</span>
+          <span class="spec-val">loop · pipeline · team</span>
+        </div>
+        <div class="spec-row">
+          <span class="spec-key">Loop</span>
+          <span class="spec-val">propose → test → measure</span>
+        </div>
+        <div class="spec-row">
+          <span class="spec-key">Pipeline</span>
+          <span class="spec-val">fixed roles + handoffs</span>
+        </div>
+        <div class="spec-row">
+          <span class="spec-key">Team</span>
+          <span class="spec-val">self-organizing + queues</span>
+        </div>
+        <div class="spec-row">
+          <span class="spec-key">Coordination</span>
+          <span class="spec-val">filesystem · markdown</span>
+        </div>
+        <div class="spec-row">
+          <span class="spec-key">Inspired by</span>
+          <span class="spec-val">Karpathy · AutoScientists · Co-Scientist</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── 02 Wiki ── -->
+<section class="section" id="wiki">
+  <div class="wrap">
+    <div class="section-num">§ 02 — Scientific wiki</div>
+    <div class="feat-grid">
+      <div class="feat-body">
+        <h2>Knowledge<br><em>that compounds.</em></h2>
+        <p class="desc">Five entity types track every part of the scientific process. Filesystem-backed — zero dependencies, portable anywhere.</p>
+        <p class="detail"><strong style="color:var(--ink)">Paper</strong> — literature references with structured citations, DOI, and extracted findings.</p>
+        <p class="detail"><strong style="color:var(--ink)">Hypothesis</strong> — testable statements with predictions, rationale, and evidence links. Status flows: draft → proposed → testing → confirmed | rejected.</p>
+        <p class="detail"><strong style="color:var(--ink)">Experiment</strong> — base-delta protocol from ELF. Reference a base protocol, describe only what changed. Minimal documentation overhead.</p>
+        <p class="detail"><strong style="color:var(--ink)">Evidence</strong> — findings with strength assessment (weak/moderate/strong). Linked to source hypothesis and experiment.</p>
+        <p class="detail"><strong style="color:var(--ink)">Insight</strong> — freeform notes. Ideas sparked by reading, discussion, or unexpected results.</p>
+        <div class="code-block">
+          <div class="code-header">
+            <span class="dot-r"></span><span class="dot-y"></span><span class="dot-g"></span>
+          </div>
+          <div class="code-body">
+            <span class="ln"><span class="p">◉</span> <span class="c">sk wiki ingest</span> <span class="a">--type hypothesis</span>  <span class="cm"># save a hypothesis</span></span>
+            <span class="ln"><span class="p">◉</span> <span class="c">sk wiki query</span> <span class="a">--search "catalyst"</span>  <span class="cm"># search the wiki</span></span>
+            <span class="ln"><span class="p">◉</span> <span class="c">sk wiki lint</span> <span class="a">--slug my-hypothesis</span>  <span class="cm"># validate</span></span>
+          </div>
+        </div>
+      </div>
+      <div class="spec-panel">
+        <div class="spec-row">
+          <span class="spec-key">Entities</span>
+          <span class="spec-val">paper · hypothesis · experiment · evidence · insight</span>
+        </div>
+        <div class="spec-row">
+          <span class="spec-key">Storage</span>
+          <span class="spec-val">~/.sk/agent/wiki/ (markdown)</span>
+        </div>
+        <div class="spec-row">
+          <span class="spec-key">Schema</span>
+          <span class="spec-val">YAML frontmatter + body</span>
+        </div>
+        <div class="spec-row">
+          <span class="spec-key">Search</span>
+          <span class="spec-val">full-text · tag · type · status</span>
+        </div>
+        <div class="spec-row">
+          <span class="spec-key">Base-delta</span>
+          <span class="spec-val">reference base · describe delta</span>
+        </div>
+        <div class="spec-row">
+          <span class="spec-key">Inspired by</span>
+          <span class="spec-val">ELF · nashsu/llm_wiki · sage-wiki</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── 03 Skills ── -->
+<section class="section" id="skills">
+  <div class="wrap">
+    <div class="section-num">§ 03 — Self-evolving skills</div>
+    <div class="feat-grid">
+      <div class="feat-body">
+        <h2>Skills that get<br><em>better with use.</em></h2>
+        <p class="desc">Natural-language skills are trainable artifacts — not static prompts. Scidekick implements the SkillOpt loop (MSR 2026) so protocols improve as you run more experiments.</p>
+        <p class="detail"><strong style="color:var(--ink)">Rollout</strong> — execute tasks with the current skill, recording scored trajectories.</p>
+        <p class="detail"><strong style="color:var(--ink)">Reflect</strong> — analyze success and failure minibatches separately. Fix recurring errors, preserve working behavior.</p>
+        <p class="detail"><strong style="color:var(--ink)">Bounded edit</strong> — propose add/delete/replace operations under an edit budget. The textual learning rate prevents destructive rewrites.</p>
+        <p class="detail"><strong style="color:var(--ink)">Gate</strong> — accept edits only when they improve held-out performance. Turns reflection into propose-and-test optimization.</p>
+        <div class="code-block">
+          <div class="code-header">
+            <span class="dot-r"></span><span class="dot-y"></span><span class="dot-g"></span>
+          </div>
+          <div class="code-body">
+            <span class="ln"><span class="p">◉</span> <span class="c">sk install-skills</span>              <span class="cm"># pull science skills</span></span>
+            <span class="ln"><span class="p">◉</span> <span class="c">sk install-skills</span> <span class="a">--list</span>       <span class="cm"># preview available</span></span>
+            <span class="ln"><span class="p">◉</span> <span class="c">sk evolve</span> <span class="a">my-protocol</span>          <span class="cm"># self-improve a skill</span></span>
+          </div>
+        </div>
+      </div>
+      <div class="spec-panel">
+        <div class="spec-row">
+          <span class="spec-key">Loop</span>
+          <span class="spec-val">rollout → reflect → edit → gate</span>
+        </div>
+        <div class="spec-row">
+          <span class="spec-key">Budget</span>
+          <span class="spec-val">bounded text edits</span>
+        </div>
+        <div class="spec-row">
+          <span class="spec-key">Buffer</span>
+          <span class="spec-val">rejected edits = negative feedback</span>
+        </div>
+        <div class="spec-row">
+          <span class="spec-key">Memory</span>
+          <span class="spec-val">slow update + meta-skill</span>
+        </div>
+        <div class="spec-row">
+          <span class="spec-key">Cross-model</span>
+          <span class="spec-val">skills transfer between models</span>
+        </div>
+        <div class="spec-row">
+          <span class="spec-key">Source</span>
+          <span class="spec-val">SkillOpt · MSR 2026</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── 04 Model Guard ── -->
+<section class="section" id="guard">
+  <div class="wrap">
+    <div class="section-num">§ 04 — Model-tier guard</div>
+    <div class="feat-grid">
+      <div class="feat-body">
+        <h2>Don't let weak models<br><em>do science.</em></h2>
+        <p class="desc">AutoScientists (MIMS Harvard, 2026) proved that Haiku-class models fail catastrophically at scientific reasoning — they hallucinate API unavailability and "describe instead of do."</p>
+        <p class="detail">Scidekick classifies every model into <strong style="color:var(--ink)">haiku</strong>, <strong style="color:var(--ink)">sonnet</strong>, or <strong style="color:var(--ink)">opus</strong> tiers based on model ID heuristics. When a Haiku-class model loads, you get a warning before any science task runs. Configurable to hard-block.</p>
+        <p class="detail">DeepSeek V3? Sonnet-tier. GPT-4o-mini? Haiku — warned. Claude Sonnet? Cleared. The guard updates automatically as new models ship.</p>
+        <div class="code-block">
+          <div class="code-header">
+            <span class="dot-r"></span><span class="dot-y"></span><span class="dot-g"></span>
+          </div>
+          <div class="code-body">
+            <span class="ln"><span class="p">◉</span> <span class="c">sk config set minScienceModelTier</span> <span class="a">sonnet</span>  <span class="cm"># default</span></span>
+            <span class="ln"><span class="p">◉</span> <span class="c">sk</span> <span class="a">--no-tier-check</span>                          <span class="cm"># bypass</span></span>
+          </div>
+        </div>
+      </div>
+      <div class="spec-panel">
+        <div class="spec-row">
+          <span class="spec-key">Tiers</span>
+          <span class="spec-val">haiku · sonnet · opus</span>
+        </div>
+        <div class="spec-row">
+          <span class="spec-key">Default</span>
+          <span class="spec-val">sonnet</span>
+        </div>
+        <div class="spec-row">
+          <span class="spec-key">Enforcement</span>
+          <span class="spec-val">warn · block</span>
+        </div>
+        <div class="spec-row">
+          <span class="spec-key">Detection</span>
+          <span class="spec-val">model ID patterns</span>
+        </div>
+        <div class="spec-row">
+          <span class="spec-key">Override</span>
+          <span class="spec-val">--no-tier-check</span>
+        </div>
+        <div class="spec-row">
+          <span class="spec-key">Source</span>
+          <span class="spec-val">AutoScientists 2026</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── 05 Validation Gate ── -->
+<section class="section" id="validation">
+  <div class="wrap">
+    <div class="section-num">§ 05 — Skill validation gate</div>
+    <div class="feat-grid">
+      <div class="feat-body">
+        <h2>Trust skills.<br><em>Verify them first.</em></h2>
+        <p class="desc">SkillLens (MSR 2026) found that 25% of skill–target pairs cause negative transfer — the skill actively harms performance. And LLM judges can't tell good skills from bad ones (46.4% accuracy — worse than chance).</p>
+        <p class="detail">Scidekick tracks every installed skill in a SQLite registry. On startup, it checks which skills have been validated against your current model. Unvalidated skills trigger a warning. Validated skills carry metadata: which models they were tested on, the performance delta, and a meta-skill rubric score.</p>
+        <div class="code-block">
+          <div class="code-header">
+            <span class="dot-r"></span><span class="dot-y"></span><span class="dot-g"></span>
+          </div>
+          <div class="code-body">
+            <span class="ln"><span class="p">◉</span> <span class="c">sk config set skillValidationEnforcement</span> <span class="a">warn</span>   <span class="cm"># default</span></span>
+            <span class="ln"><span class="p">◉</span> <span class="c">sk config set skillValidationEnforcement</span> <span class="a">block</span>  <span class="cm"># hard mode</span></span>
+          </div>
+        </div>
+      </div>
+      <div class="spec-panel">
+        <div class="spec-row">
+          <span class="spec-key">Registry</span>
+          <span class="spec-val">SQLite in agent.db</span>
+        </div>
+        <div class="spec-row">
+          <span class="spec-key">Metadata</span>
+          <span class="spec-val">models · delta · rubric score</span>
+        </div>
+        <div class="spec-row">
+          <span class="spec-key">Enforcement</span>
+          <span class="spec-val">warn · block · off</span>
+        </div>
+        <div class="spec-row">
+          <span class="spec-key">Rubric</span>
+          <span class="spec-val">failure-mechanisms · specificity · blacklist</span>
+        </div>
+        <div class="spec-row">
+          <span class="spec-key">Source</span>
+          <span class="spec-val">SkillLens · MSR 2026</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── 06 Platform ── -->
+<section class="section" id="platform">
+  <div class="wrap">
+    <div class="section-num">§ 06 — Inherited platform</div>
+    <div class="feat-grid">
+      <div class="feat-body">
+        <h2>Everything Oh My Pi had.<br><em>Plus science.</em></h2>
+        <p class="desc">Scidekick inherits the full Pi/omp platform. LSP wired into every write. Native Rust ripgrep + glob. Hashline content-addressed edits. Subagent isolation with 10+ CoW backends. Every feature ships in the same binary.</p>
+      </div>
+    </div>
+    <div class="card-grid">
+      <div class="card">
+        <span class="card-icon">LSP + DAP</span>
+        <h3>IDE wired in</h3>
+        <p>14 LSP operations, 28 debug adapter ops. Renames go through willRenameFiles. Debuggers attach via lldb, dlv, debugpy.</p>
+      </div>
+      <div class="card">
+        <span class="card-icon">Code execution</span>
+        <h3>Persistent kernels</h3>
+        <p>Persistent Python + Bun Worker. Either kernel calls back into agent tools. %%bash, %pip, %time. 5-min idle, max 4 sessions.</p>
+      </div>
+      <div class="card">
+        <span class="card-icon">Hashline edits</span>
+        <h3>Content-addressed</h3>
+        <p>Content-hash anchors. Stale files rejected before corruption. Grok 4 Fast: −61% output tokens on the same work.</p>
+      </div>
+      <div class="card">
+        <span class="card-icon">Subagents</span>
+        <h3>32 concurrent workers</h3>
+        <p>Schema-validated yields. 10+ filesystem isolation backends. IRC channels for peer coordination.</p>
+      </div>
+      <div class="card">
+        <span class="card-icon">Native Rust</span>
+        <h3>~27k lines of Rust</h3>
+        <p>ripgrep, glob, find: in-process. brush shell with persistent sessions. Same binary on macOS, Linux, Windows.</p>
+      </div>
+      <div class="card">
+        <span class="card-icon">Internal URLs</span>
+        <h3>Every surface is a URL</h3>
+        <p>pr://, issue://, agent://, skill://, rule:// resolve inside read/write/edit. No separate tools to learn.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── URL Schemes ── -->
+<section class="section" id="urls">
+  <div class="wrap">
+    <div class="section-num">§ 07 — URL schemes</div>
+    <div class="feat-grid">
+      <div class="feat-body">
+        <h2>Read PRs. Walk skills.<br><em>Query the wiki.</em></h2>
+        <p class="desc">Internal schemes resolve transparently in every FS-shaped tool. <code>read pr://1428</code> returns the same shape as <code>read src/foo.ts</code>. <code>wiki://hypothesis/my-idea</code> opens a wiki entry. One tool surface — the model already knows how to use it.</p>
+      </div>
+    </div>
+    <div class="scheme-grid">
+      <div class="scheme-item"><span class="scheme-prefix">pr://</span><span class="scheme-desc">PRs, diffs, comments</span></div>
+      <div class="scheme-item"><span class="scheme-prefix">issue://</span><span class="scheme-desc">GitHub issues</span></div>
+      <div class="scheme-item"><span class="scheme-prefix">agent://</span><span class="scheme-desc">Subagent output</span></div>
+      <div class="scheme-item"><span class="scheme-prefix">skill://</span><span class="scheme-desc">Skill instructions</span></div>
+      <div class="scheme-item"><span class="scheme-prefix">rule://</span><span class="scheme-desc">Rule details</span></div>
+      <div class="scheme-item"><span class="scheme-prefix">wiki://</span><span class="scheme-desc">Wiki entries</span></div>
+      <div class="scheme-item"><span class="scheme-prefix">artifact://</span><span class="scheme-desc">Full tool output</span></div>
+      <div class="scheme-item"><span class="scheme-prefix">memory://</span><span class="scheme-desc">Hindsight memory</span></div>
+      <div class="scheme-item"><span class="scheme-prefix">local://</span><span class="scheme-desc">Plans + subagent artifacts</span></div>
+      <div class="scheme-item"><span class="scheme-prefix">mcp://</span><span class="scheme-desc">MCP resources</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ── Install ── -->
+<section class="section" id="install">
+  <div class="wrap">
+    <div class="section-num">§ 08 — Install</div>
+    <div class="feat-grid">
+      <div class="feat-body">
+        <h2>One command.<br><em>No setup.</em></h2>
+        <p class="desc">Requires Bun ≥ 1.3.14. macOS, Linux, and Windows. Single binary — no dependencies to install first.</p>
+        <div class="code-block">
+          <div class="code-header">
+            <span class="dot-r"></span><span class="dot-y"></span><span class="dot-g"></span>
+          </div>
+          <div class="code-body">
+            <span class="ln"><span class="p">◉</span> <span class="c">curl</span> <span class="a">-fsSL https://raw.githubusercontent.com/felippe-alves/scidekick/main/scripts/install.sh</span> <span class="c">| sh</span></span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── Footer ── -->
+<footer>
+  <div class="wrap footer-inner">
+    <span class="footer-brand">◉ Scidekick</span>
+    <div style="display:flex;gap:20px;flex-wrap:wrap;align-items:center">
+      <a href="https://github.com/felippe-alves/scidekick/blob/main/LICENSE">MIT</a>
+      <a href="https://github.com/badlogic/pi-mono">Built on Pi</a>
+      <a href="https://github.com/can1357/oh-my-pi">Oh My Pi</a>
+      <a href="https://github.com/felippe-alves/scidekick">GitHub</a>
+      <a href="https://github.com/felippe-alves/scidekick/blob/main/CHANGELOG.md">Changelog</a>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>
