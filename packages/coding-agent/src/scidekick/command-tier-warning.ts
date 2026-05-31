@@ -9,7 +9,9 @@ import {
 	resolveConfiguredScienceModel,
 } from "./model-tier";
 
-export async function getScientificCommandTierWarning(command: "wiki" | "install-skills"): Promise<string | null> {
+export async function getScientificCommandTierWarning(
+	command: "wiki" | "journal" | "install-skills",
+): Promise<string | null> {
 	const settings = await Settings.init({ cwd: getProjectDir() });
 	const authStorage = await discoverAuthStorage();
 	const modelRegistry = new ModelRegistry(authStorage);

@@ -26,19 +26,19 @@ async function runCli(args: string[]): Promise<{ stdout: string; stderr: string;
 }
 
 describe("Scidekick CLI identity", () => {
-	it("prints sk as the default app name in version output", async () => {
+	it("prints scidekick as the default app name in version output", async () => {
 		const result = await runCli(["--version"]);
 
 		expect(result.exitCode).toBe(0);
-		expect(result.stdout.trim()).toMatch(/^sk\/\d+\.\d+\.\d+/);
+		expect(result.stdout.trim()).toBe("scidekick/1.1.0");
 	});
 
-	it("uses sk and .sk in root help examples", async () => {
+	it("uses scidekick and .sk in root help examples", async () => {
 		const result = await runCli(["--help"]);
 
 		expect(result.exitCode).toBe(0);
-		expect(result.stdout).toContain("$ sk [COMMAND]");
-		expect(result.stdout).toContain("sk agents unpack");
+		expect(result.stdout).toContain("$ scidekick [COMMAND]");
+		expect(result.stdout).toContain("scidekick agents unpack");
 		expect(result.stdout).toContain("~/.sk/agent/agents");
 		expect(result.stdout).toContain("./.sk/agents");
 	});

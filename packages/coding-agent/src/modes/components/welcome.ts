@@ -27,8 +27,8 @@ export function renderWelcomeTip(tip: string, boxWidth: number): string[] {
 	if (wrappedBody.length === 0) return [];
 
 	const encoding = TERMINAL.trueColor ? "ansi-16m" : "ansi-256";
-	const purple = Bun.color("#b48cff", encoding) ?? "";
-	const lightBlue = Bun.color("#9ccfff", encoding) ?? "";
+	const labelColor = Bun.color("#7b8f45", encoding) ?? "";
+	const bodyColor = Bun.color("#3d4822", encoding) ?? "";
 	const italic = "\x1b[3m";
 	const dim = "\x1b[2m";
 	const reset = "\x1b[0m";
@@ -36,8 +36,8 @@ export function renderWelcomeTip(tip: string, boxWidth: number): string[] {
 
 	return wrappedBody.map((body, index) =>
 		index === 0
-			? ` ${italic}${purple}${label}${dim}${lightBlue}${body}${reset}`
-			: ` ${italic}${continuationIndent}${dim}${lightBlue}${body}${reset}`,
+			? ` ${italic}${labelColor}${label}${dim}${bodyColor}${body}${reset}`
+			: ` ${italic}${continuationIndent}${dim}${bodyColor}${body}${reset}`,
 	);
 }
 
@@ -53,7 +53,7 @@ export interface LspServerInfo {
 }
 
 /**
- * Premium welcome screen with block-based OMP logo and two-column layout.
+ * Scientific-instrument welcome screen with binary-tree Scidekick logo and two-column layout.
  */
 export class WelcomeComponent implements Component {
 	#animStart: number | null = null;
@@ -72,9 +72,9 @@ export class WelcomeComponent implements Component {
 	invalidate(): void {}
 
 	/**
-	 * Play a one-shot intro that sweeps the gradient through every phase
-	 * before settling on the resting frame. Safe to call multiple times —
-	 * subsequent calls reset and replay.
+	 * Play a one-shot intro that propagates brightness bottom-up through the
+	 * binary-tree logo before settling on the resting frame. Safe to call
+	 * multiple times — subsequent calls reset and replay.
 	 */
 	playIntro(requestRender: () => void): void {
 		this.#stopAnimation();
@@ -137,7 +137,7 @@ export class WelcomeComponent implements Component {
 		const leftCol = showRightColumn ? dualLeftCol : boxWidth - 2;
 		const rightCol = showRightColumn ? dualRightCol : 0;
 
-		// Logo: pick a frame from the intro animation if active, else the resting frame.
+		// Logo: pick a signal-propagation frame if active, else the resting frame.
 		const logoColored = this.#currentLogoFrame();
 
 		// Left column - centered content
@@ -260,9 +260,9 @@ export class WelcomeComponent implements Component {
 	}
 
 	/**
-	 * Render the per-instance tip line: a purple "Tip:" label followed by the
-	 * tip body in dimmed light blue, the whole line italicized. Returns `[]`
-	 * when no tip is available or the box is too narrow to be useful.
+	 * Render the per-instance tip line: an olive "Tip:" label followed by the
+	 * tip body in dim olive, the whole line italicized. Returns `[]` when no tip
+	 * is available or the box is too narrow to be useful.
 	 */
 	#renderTip(boxWidth: number): string[] {
 		if (!this.#tip) return [];
@@ -310,34 +310,25 @@ export class WelcomeComponent implements Component {
 		if (this.#animStart == null) return REST_FRAME;
 		const elapsed = performance.now() - this.#animStart;
 		if (elapsed >= INTRO_MS) return REST_FRAME;
-		// Ease-out cubic so the spin decelerates into the resting state.
 		const progress = elapsed / INTRO_MS;
 		const eased = 1 - (1 - progress) ** 3;
-		// Sweep backward through INTRO_SWEEPS full rotations so the gradient
-		// visibly spins multiple times. `eased == 1` → phase = 0 = resting frame.
-		const phase = ((((1 - eased) * INTRO_SWEEPS) % 1) + 1) % 1;
-		// Shine traverses the diagonal at a steady pace, decoupled from the
-		// gradient phase so the two layers parallax. Strength fades out with
-		// the same ease-out curve so the highlight is gone by the resting frame.
-		const shinePos = (((progress * INTRO_SHINE_TRAVERSALS) % 1) + 1) % 1;
-		const shineStrength = (1 - eased) ** 1.5;
-		return gradientLogo(PI_LOGO, phase, { strength: shineStrength, pos: shinePos });
+		return gradientLogo(PI_LOGO, eased);
 	}
 }
 
-export const PI_LOGO = ["▀██████████▀", " ╘██    ██  ", "  ██    ██  ", "  ██    ██  ", " ▄██▄  ▄██▄ "];
+export const PI_LOGO = ["    ●    ", "   ╱ ╲   ", "  ●   ●  ", " ╱ ╲ ╱ ╲ ", "●   ●   ●"];
 
-/** Multi-stop palette for the diagonal gradient. */
+/** Multi-stop monochrome palette for signal/readout effects. */
 const GRADIENT_STOPS: ReadonlyArray<readonly [number, number, number]> = [
-	[255, 92, 200], // hot pink
-	[200, 110, 255], // violet
-	[120, 130, 255], // periwinkle
-	[60, 200, 255], // bright cyan
-	[120, 255, 220], // mint
+	[26, 36, 16], // deep
+	[61, 72, 34], // dim
+	[123, 143, 69], // mid
+	[170, 200, 50], // accent
+	[192, 222, 68], // glow
 ];
 
 /** 256-color ramp fallback when truecolor isn't available. */
-const GRADIENT_RAMP_256 = [199, 171, 135, 99, 75, 51, 87];
+const GRADIENT_RAMP_256 = [22, 58, 100, 148, 154];
 
 /** Half-width of the shine highlight band, expressed in gradient-t units. */
 const SHINE_HALF_WIDTH = 0.18;
@@ -350,19 +341,17 @@ export interface ShineConfig {
 }
 
 /**
- * Resolve the gradient SGR foreground escape for a normalized position `t`
- * (0..1) along the diagonal, compositing the optional sliding shine highlight.
- * Shared by {@link gradientLogo} and the setup splash so both stay
- * color-identical (truecolor when available, 256-color ramp otherwise).
+ * Resolve the monochrome signal SGR foreground escape for a normalized position
+ * `t` (0..1), compositing the optional sliding shine highlight. Shared by
+ * {@link gradientLogo} and the setup splash so both stay color-identical.
  */
 export function gradientEscape(t: number, shine?: ShineConfig): string {
+	const boundedT = Math.max(0, Math.min(1, t));
 	const shineStrength = shine && shine.strength > 0 ? shine.strength : 0;
 	const shinePos = shine ? shine.pos : 0;
 	if (TERMINAL.trueColor) {
-		// 5-stop palette widens the visible color range and avoids the
-		// deep-blue valley a naive HSL lerp falls into.
 		const stops = GRADIENT_STOPS;
-		const seg = t * (stops.length - 1);
+		const seg = boundedT * (stops.length - 1);
 		const i = Math.min(stops.length - 2, Math.floor(seg));
 		const f = seg - i;
 		const a = stops[i];
@@ -371,7 +360,7 @@ export function gradientEscape(t: number, shine?: ShineConfig): string {
 		let g = a[1] + (b[1] - a[1]) * f;
 		let bl = a[2] + (b[2] - a[2]) * f;
 		if (shineStrength > 0) {
-			const dist = Math.abs(t - shinePos);
+			const dist = Math.abs(boundedT - shinePos);
 			const intensity = Math.max(0, 1 - dist / SHINE_HALF_WIDTH) * shineStrength;
 			if (intensity > 0) {
 				r += (255 - r) * intensity;
@@ -382,29 +371,34 @@ export function gradientEscape(t: number, shine?: ShineConfig): string {
 		return `\x1b[38;2;${Math.round(r)};${Math.round(g)};${Math.round(bl)}m`;
 	}
 	const ramp = GRADIENT_RAMP_256;
-	let idx = Math.min(ramp.length - 1, Math.max(0, Math.floor(t * (ramp.length - 1) + 0.5)));
+	let idx = Math.min(ramp.length - 1, Math.max(0, Math.floor(boundedT * (ramp.length - 1) + 0.5)));
 	if (shineStrength > 0) {
-		const dist = Math.abs(t - shinePos);
+		const dist = Math.abs(boundedT - shinePos);
 		const intensity = Math.max(0, 1 - dist / SHINE_HALF_WIDTH) * shineStrength;
-		// Promote to the brightest ramp slot when the shine band peaks here.
 		if (intensity > 0.5) idx = ramp.length - 1;
 	}
 	return `\x1b[38;5;${ramp[idx]}m`;
 }
 
+function logoRoleT(char: string, y: number, rows: number, phase: number): number {
+	const bottomUpProgress = rows <= 1 ? 1 : 1 - y / (rows - 1);
+	const activeBoost = phase >= bottomUpProgress ? 0.18 : -0.12;
+	if (char === "╱" || char === "╲") return Math.max(0, 0.25 + activeBoost);
+	if (char === "●") return y === rows - 1 ? Math.min(1, 0.82 + activeBoost) : Math.min(1, 0.55 + activeBoost);
+	return 0.4;
+}
+
 /**
- * Apply a multi-stop diagonal gradient (bottom-left → top-right) plus an
- * optional sliding shine band across multi-line art. `phase` (0..1) shifts the
- * gradient along the diagonal, wrapping at 1. When `shine` is provided, a soft
- * white highlight is composited on top, centered at `shine.pos`.
+ * Apply Scidekick's monochrome signal palette across multi-line art. For logo
+ * art, node/edge glyphs receive role colors; `phase` propagates brightness
+ * bottom-up. For setup splash art, the same palette acts as a spatial gradient.
  */
-export function gradientLogo(lines: readonly string[], phase = 0, shine?: ShineConfig): string[] {
+export function gradientLogo(lines: readonly string[], phase = 1, shine?: ShineConfig): string[] {
 	const reset = "\x1b[0m";
 	const rows = lines.length;
 	const cols = Math.max(...lines.map(l => l.length));
-	// span+1 so `base` stays strictly < 1: avoids the wrap-around at the
-	// far corner mapping back to t=0 (hot pink) on the resting frame.
 	const span = Math.max(1, cols + rows - 1);
+	const normalizedPhase = Math.max(0, Math.min(1, phase));
 	return lines.map((line, y) => {
 		let result = "";
 		for (let x = 0; x < line.length; x++) {
@@ -413,9 +407,9 @@ export function gradientLogo(lines: readonly string[], phase = 0, shine?: ShineC
 				result += char;
 				continue;
 			}
-			// Diagonal: bottom-left (x=0, y=rows-1) → top-right (x=cols-1, y=0)
-			const base = (x + (rows - 1 - y)) / span;
-			const t = (((base + phase) % 1) + 1) % 1;
+			const roleT = logoRoleT(char, y, rows, normalizedPhase);
+			const spatialT = (x + (rows - 1 - y)) / span;
+			const t = char === "●" || char === "╱" || char === "╲" ? roleT : spatialT;
 			result += gradientEscape(t, shine) + char + reset;
 		}
 		return result;
@@ -423,13 +417,9 @@ export function gradientLogo(lines: readonly string[], phase = 0, shine?: ShineC
 }
 
 /** Total length of the intro animation. */
-const INTRO_MS = 3000;
+const INTRO_MS = 1600;
 /** Render cadence during the intro (~30fps). */
 const INTRO_TICK_MS = 33;
-/** Number of full gradient rotations the sweep performs before settling. */
-const INTRO_SWEEPS = 2.5;
-/** Number of times the shine highlight crosses the diagonal across the intro. */
-const INTRO_SHINE_TRAVERSALS = 3;
 
-/** Resting gradient frame, cached for re-renders outside of the intro. */
-const REST_FRAME = gradientLogo(PI_LOGO, 0);
+/** Resting signal frame, cached for re-renders outside of the intro. */
+const REST_FRAME = gradientLogo(PI_LOGO, 1);

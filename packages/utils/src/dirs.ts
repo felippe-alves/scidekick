@@ -16,8 +16,8 @@ import * as os from "node:os";
 import * as path from "node:path";
 import { engines, version } from "../package.json" with { type: "json" };
 
-/** App name (e.g. "sk") */
-export const APP_NAME: string = Bun.env.SK_APP_NAME || "sk";
+/** Display app name (the CLI binary remains `sk`). */
+export const APP_NAME: string = Bun.env.SK_APP_NAME || "scidekick";
 
 /** Config directory name (e.g. ".sk") */
 export const CONFIG_DIR_NAME: string = Bun.env.SK_CONFIG_DIR || ".sk";

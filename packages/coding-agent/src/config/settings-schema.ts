@@ -405,13 +405,14 @@ export const SETTINGS_SCHEMA = {
 	// Status line
 	"statusLine.preset": {
 		type: "enum",
-		values: ["default", "minimal", "compact", "full", "nerd", "ascii", "custom"] as const,
-		default: "default",
+		values: ["scidekick", "default", "minimal", "compact", "full", "nerd", "ascii", "custom"] as const,
+		default: "scidekick",
 		ui: {
 			tab: "appearance",
 			label: "Status Line Preset",
 			description: "Pre-built status line configurations",
 			options: [
+				{ value: "scidekick", label: "Scidekick", description: "Instrument-style model, path, git, cost" },
 				{ value: "default", label: "Default", description: "Model, path, git, context, tokens, cost" },
 				{ value: "minimal", label: "Minimal", description: "Path and git only" },
 				{ value: "compact", label: "Compact", description: "Model, git, cost, context" },
@@ -425,13 +426,14 @@ export const SETTINGS_SCHEMA = {
 
 	"statusLine.separator": {
 		type: "enum",
-		values: ["powerline", "powerline-thin", "slash", "pipe", "block", "none", "ascii"] as const,
-		default: "powerline-thin",
+		values: ["scidekick", "powerline", "powerline-thin", "slash", "pipe", "block", "none", "ascii"] as const,
+		default: "scidekick",
 		ui: {
 			tab: "appearance",
 			label: "Status Line Separator",
 			description: "Style of separators between segments",
 			options: [
+				{ value: "scidekick", label: "Scidekick", description: "Instrument-style block separators" },
 				{ value: "powerline", label: "Powerline", description: "Solid arrows (Nerd Font)" },
 				{ value: "powerline-thin", label: "Thin chevron", description: "Thin arrows (Nerd Font)" },
 				{ value: "slash", label: "Slash", description: "Forward slashes" },

@@ -7,6 +7,11 @@ function trimSep(value: string): string {
 
 export function getSeparator(style: StatusLineSeparatorStyle, theme: Theme): SeparatorDef {
 	switch (style) {
+		case "scidekick":
+			return {
+				left: theme.sep.block,
+				right: theme.sep.block,
+			};
 		case "powerline":
 			return {
 				left: theme.sep.powerlineLeft,

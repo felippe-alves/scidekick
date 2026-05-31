@@ -24,7 +24,7 @@ afterEach(async () => {
 
 async function runCli(args: string[], extraEnv: Record<string, string> = {}) {
 	const proc = Bun.spawn(["bun", "run", cliPath, ...args], {
-		cwd: repoRoot,
+		cwd: tempRoot,
 		env: {
 			...Bun.env,
 			HOME: homeDir,
@@ -120,6 +120,8 @@ describe("Scidekick wiki command", () => {
 			expect(create.exitCode).toBe(0);
 			expect(create.stdout).toContain("Created catalyst-lowers-activation-energy");
 
+			const wikiIndex = path.join(tempRoot, ".sk", "wiki", "index.md");
+			expect(await Bun.file(wikiIndex).text()).toContain("# Research Wiki");
 			const list = await runCli(["wiki", "list"]);
 			expect(list.exitCode).toBe(0);
 			expect(list.stdout).toContain(
@@ -134,6 +136,53 @@ describe("Scidekick wiki command", () => {
 			const lint = await runCli(["wiki", "lint", "catalyst-lowers-activation-energy"]);
 			expect(lint.exitCode).toBe(0);
 			expect(lint.stdout).toContain("OK: catalyst-lowers-activation-energy");
+		},
+		{ timeout: 30000 },
+	);
+
+	it(
+		"initializes project wiki pages and queries them",
+		async () => {
+			const init = await runCli(["wiki", "init"]);
+			expect(init.exitCode).toBe(0);
+			expect(init.stdout).toContain(path.join(tempRoot, ".sk", "wiki"));
+
+			const page = await runCli(["wiki", "page", "Baseline eval"]);
+			expect(page.exitCode).toBe(0);
+			expect(page.stdout).toContain("Created baseline-eval");
+
+			const query = await runCli(["wiki", "query", "Baseline"]);
+			expect(query.exitCode).toBe(0);
+			expect(query.stdout).toContain("baseline-eval\tnote\tBaseline eval");
+		},
+		{ timeout: 30000 },
+	);
+});
+
+describe("Scidekick journal command", () => {
+	it(
+		"initializes, appends, prints, and links journal entries",
+		async () => {
+			const init = await runCli(["journal", "init"]);
+			expect(init.exitCode).toBe(0);
+			expect(init.stdout).toContain(path.join(tempRoot, ".sk", "journal"));
+
+			const add = await runCli(["journal", "add", "Tried baseline eval"]);
+			expect(add.exitCode).toBe(0);
+			expect(add.stdout).toContain("Added ");
+			const entryId = add.stdout.match(/Added (\d{4}-\d{2}-\d{2}-\d{6})/)?.[1];
+			expect(entryId).toBeDefined();
+
+			const today = await runCli(["journal", "today"]);
+			expect(today.exitCode).toBe(0);
+			expect(today.stdout).toContain("Tried baseline eval");
+
+			const link = await runCli(["journal", "link", entryId!, "wiki:baseline-eval"]);
+			expect(link.exitCode).toBe(0);
+			expect(link.stdout).toContain(`Linked ${entryId} to wiki:baseline-eval`);
+
+			const linkedToday = await runCli(["journal", "today"]);
+			expect(linkedToday.stdout).toContain("- wiki:baseline-eval");
 		},
 		{ timeout: 30000 },
 	);

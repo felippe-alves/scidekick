@@ -30,6 +30,7 @@ export const commands: CommandEntry[] = [
 		load: () => import("./commands/install-skills").then(m => m.default),
 		aliases: ["skills"],
 	},
+	{ name: "journal", load: () => import("./commands/journal").then(m => m.default) },
 	{ name: "plugin", load: () => import("./commands/plugin").then(m => m.default) },
 	{ name: "setup", load: () => import("./commands/setup").then(m => m.default) },
 	{ name: "shell", load: () => import("./commands/shell").then(m => m.default) },

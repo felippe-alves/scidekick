@@ -220,6 +220,9 @@ The `◉` glyph precedes the name in the status bar and welcome box title. It is
 |---|---|
 | `.sk/dark.json` | Full palette replacement per spec above |
 | `.sk/light.json` | Full palette replacement per spec above |
-| `vendor/oh-my-pi` (submodule) | Logo replacement in `src/modes/components/welcome.ts` — requires decision: fork, local patch, or override hook |
-
-The `APP_NAME` used in the welcome box title comes from `@oh-my-pi/pi-utils`. If it reads `oh-my-pi` rather than `scidekick`, that also needs to be overridden at the submodule or harness layer.
+| `packages/coding-agent/src/modes/theme/dark.json` | Built-in dark palette replacement |
+| `packages/coding-agent/src/modes/theme/light.json` | Built-in light palette replacement |
+| `packages/coding-agent/src/modes/components/welcome.ts` | Binary-tree logo and signal-propagation intro |
+| `packages/coding-agent/src/modes/components/status-line.ts` | Instrument-style Scidekick status rendering |
+| `packages/coding-agent/src/modes/components/status-line/presets.ts` | Default Scidekick status preset |
+| `packages/utils/src/dirs.ts` | Display app name defaults to `scidekick`; CLI binary remains `sk` |

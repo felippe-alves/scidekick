@@ -75,6 +75,7 @@ function createStatusLineSession(sessionName: string) {
 		getAsyncJobSnapshot: () => ({ running: [] }),
 		getCurrentModel: () => undefined,
 		isFastModeEnabled: () => false,
+		isFastModeActive: () => false,
 		sessionManager: {
 			getSessionName: () => sessionName,
 			getUsageStatistics: () => ({
@@ -119,6 +120,29 @@ describe("status line session accent", () => {
 		// glyph) must not appear. The session_name segment may still emit the accent ANSI
 		// for its own text — we only care that the gap is not accent-painted.
 		expect(border).not.toContain(`${accentAnsi}${theme.boxRound.horizontal}`);
+	});
+});
+
+describe("scidekick status line", () => {
+	it("renders instrument-style caps and block separators", () => {
+		const component = new StatusLineComponent(createStatusLineSession("Named session"));
+		component.updateSettings({
+			preset: "scidekick",
+			separator: "scidekick",
+			leftSegments: ["pi", "model", "path", "git", "cost"],
+			rightSegments: [],
+			segmentOptions: {
+				model: { showThinkingLevel: false, showIcon: false },
+				path: { abbreviate: true, maxLength: 20, stripWorkPrefix: true },
+				git: { showBranch: false },
+			},
+		});
+
+		const plain = Bun.stripANSI(component.getTopBorder(80).content);
+
+		expect(plain).toStartWith("▐ ◉ ▌ no-model");
+		expect(plain).toEndWith(" ▐");
+		expect(plain).toContain(" ▌ ");
 	});
 });
 

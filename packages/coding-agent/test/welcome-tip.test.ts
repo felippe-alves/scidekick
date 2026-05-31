@@ -1,5 +1,5 @@
 import { describe, expect, it } from "bun:test";
-import { renderWelcomeTip } from "@oh-my-pi/pi-coding-agent/modes/components/welcome";
+import { gradientLogo, PI_LOGO, renderWelcomeTip } from "@oh-my-pi/pi-coding-agent/modes/components/welcome";
 import { visibleWidth } from "@oh-my-pi/pi-tui";
 
 describe("renderWelcomeTip", () => {
@@ -16,5 +16,13 @@ describe("renderWelcomeTip", () => {
 		for (const line of plain) {
 			expect(visibleWidth(line)).toBeLessThanOrEqual(width);
 		}
+	});
+});
+
+describe("Scidekick welcome logo", () => {
+	it("renders the binary-tree mark without changing its visible shape", () => {
+		const plain = gradientLogo(PI_LOGO).map(line => Bun.stripANSI(line));
+
+		expect(plain).toEqual(["    ●    ", "   ╱ ╲   ", "  ●   ●  ", " ╱ ╲ ╱ ╲ ", "●   ●   ●"]);
 	});
 });

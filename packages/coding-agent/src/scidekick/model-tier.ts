@@ -87,13 +87,16 @@ export function meetsScienceTier(model: Pick<Model, "id" | "provider">, minTier:
 }
 
 export function detectScienceContext(options: {
-	command?: "wiki" | "install-skills";
+	command?: "wiki" | "journal" | "install-skills";
 	systemPrompt?: string;
 	appendSystemPrompt?: string;
 	skills?: readonly Pick<Skill, "name">[];
 }): ScienceContext | null {
 	if (options.command === "wiki") {
 		return { kind: "scientific-command", reason: "scientific wiki command" };
+	}
+	if (options.command === "journal") {
+		return { kind: "scientific-command", reason: "scientific journal command" };
 	}
 	if (options.command === "install-skills") {
 		return { kind: "scientific-command", reason: "scientific skill installation command" };

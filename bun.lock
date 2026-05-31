@@ -45,7 +45,7 @@
     },
     "packages/coding-agent": {
       "name": "@oh-my-pi/pi-coding-agent",
-      "version": "15.7.4",
+      "version": "1.1.0",
       "bin": {
         "sk": "src/cli.ts",
       },
@@ -121,15 +121,15 @@
     },
     "packages/scidekick-guard": {
       "name": "@scidekick/guard",
-      "version": "1.0.0",
+      "version": "1.1.0",
     },
     "packages/scidekick-science": {
       "name": "@scidekick/science",
-      "version": "1.0.0",
+      "version": "1.1.0",
     },
     "packages/scidekick-skills": {
       "name": "@scidekick/skills",
-      "version": "1.0.0",
+      "version": "1.1.0",
     },
     "packages/stats": {
       "name": "@oh-my-pi/omp-stats",
@@ -215,7 +215,7 @@
     },
     "packages/utils": {
       "name": "@oh-my-pi/pi-utils",
-      "version": "15.7.4",
+      "version": "1.1.0",
       "dependencies": {
         "@oh-my-pi/pi-natives": "catalog:",
         "beautiful-mermaid": "catalog:",
@@ -260,11 +260,11 @@
     "@oh-my-pi/omp-stats": "15.7.4",
     "@oh-my-pi/pi-agent-core": "15.7.4",
     "@oh-my-pi/pi-ai": "15.7.4",
-    "@oh-my-pi/pi-coding-agent": "15.7.4",
+    "@oh-my-pi/pi-coding-agent": "1.1.0",
     "@oh-my-pi/pi-mnemopi": "15.7.4",
     "@oh-my-pi/pi-natives": "15.7.4",
     "@oh-my-pi/pi-tui": "15.7.4",
-    "@oh-my-pi/pi-utils": "15.7.4",
+    "@oh-my-pi/pi-utils": "1.1.0",
     "@opentelemetry/api": "^1.9.1",
     "@opentelemetry/context-async-hooks": "^2.7.1",
     "@opentelemetry/sdk-trace-base": "^2.7.1",

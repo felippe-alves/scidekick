@@ -24,7 +24,7 @@ import { getSeparator } from "./status-line/separators";
 import { calculateTokensPerSecond } from "./status-line/token-rate";
 
 export interface StatusLineSegmentOptions {
-	model?: { showThinkingLevel?: boolean };
+	model?: { showThinkingLevel?: boolean; showIcon?: boolean };
 	path?: { abbreviate?: boolean; maxLength?: number; stripWorkPrefix?: boolean };
 	git?: { showBranch?: boolean; showStaged?: boolean; showUnstaged?: boolean; showUntracked?: boolean };
 	time?: { format?: "12h" | "24h"; showSeconds?: boolean };
@@ -598,7 +598,7 @@ export class StatusLineComponent implements Component {
 		Pick<StatusLineSettings, "leftSegments" | "rightSegments" | "separator" | "segmentOptions">
 	> &
 		StatusLineSettings {
-		const preset = this.#settings.preset ?? "default";
+		const preset = this.#settings.preset ?? "scidekick";
 		const presetDef = getPreset(preset);
 		const useCustomSegments = preset === "custom";
 		const mergedSegmentOptions: StatusLineSettings["segmentOptions"] = {};
@@ -665,6 +665,14 @@ export class StatusLineComponent implements Component {
 			const label = `${formatCount("job", runningBackgroundJobs)} running`;
 			rightParts.push(theme.fg("statusLineSubagents", `${icon}${label}`));
 		}
+		if ((effectiveSettings.separator ?? "powerline-thin") === "scidekick") {
+			const parts = [...leftParts, ...rightParts];
+			if (parts.length === 0) return "";
+			const cap = theme.fg("statusLineSep", "▐");
+			const sep = theme.fg("statusLineSep", "▌");
+			return truncateToWidth(`${cap} ${parts.join(` ${sep} `)} ${cap}`, width);
+		}
+
 		const topFillWidth = Math.max(0, width);
 		const left = [...leftParts];
 		const right = [...rightParts];

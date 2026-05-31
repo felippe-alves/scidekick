@@ -71,7 +71,7 @@ function classifyProjectDir(pwd: string): { scratch: boolean; relative: string |
 const piSegment: StatusLineSegment = {
 	id: "pi",
 	render(_ctx) {
-		const content = theme.icon.pi ? `${theme.icon.pi} ` : "";
+		const content = theme.icon.pi;
 		return { content: theme.fg("accent", content), visible: true };
 	},
 };
@@ -87,7 +87,7 @@ const modelSegment: StatusLineSegment = {
 			modelName = modelName.slice(7);
 		}
 
-		let content = withIcon(theme.icon.model, modelName);
+		let content = opts.showIcon === false ? modelName : withIcon(theme.icon.model, modelName);
 
 		if (ctx.session.isFastModeActive() && theme.icon.fast) {
 			content += ` ${theme.icon.fast}`;
