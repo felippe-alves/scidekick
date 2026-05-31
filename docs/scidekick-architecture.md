@@ -1,6 +1,42 @@
 # Scidekick Architecture & Direction
 
-Analysis of the landscape for converting Scidekick into a science/research agent harness. Last updated 2026-05-31. Now a layered architecture over Oh My Pi (vendor submodule) instead of a deep-rename fork.
+Analysis of the landscape for converting Scidekick into a science/research agent harness. Last updated 2026-05-31. Scidekick is currently a direct fork of Oh My Pi, not a vendor submodule and not a deep-rename fork.
+
+---
+
+## Current Implementation Status
+
+This document is partly aspirational. The checked roadmap below has been corrected to distinguish code that exists from product behavior that is actually wired into the CLI.
+
+### Implemented and working
+
+- Direct Oh My Pi fork with a localized app-name/config-dir override in `packages/utils/src/dirs.ts`.
+- Source CLI can identify as `sk` when `SK_APP_NAME=sk` is set.
+- Standalone Scidekick packages exist:
+  - `packages/scidekick-science`
+  - `packages/scidekick-guard`
+  - `packages/scidekick-skills`
+- `packages/scidekick-guard` provides tested model-tier classification helpers and a SQLite skill registry.
+- `packages/scidekick-science` provides a tested filesystem wiki backend plus schema templates.
+- `site/index.html` exists as a static landing page.
+- The release workflow currently builds and publishes GitHub release binaries; the full `test` job has one inherited Oh My Pi failure in `packages/coding-agent/test/bash-executor.test.ts`.
+
+### Implemented but not wired into the product
+
+- `install-skills` exists as a command class in `packages/scidekick-skills`, but it is not registered with the coding-agent CLI and currently has a missing `getAgentDir` import.
+- The model-tier guard is a library only; it does not warn or block model selection in scientific contexts yet.
+- The skill registry records metadata, but no validation benchmark/gate runs before skills are used.
+- The wiki backend is a library only; there is no `sk wiki` command yet.
+- Violet-teal-amber theme files exist under `.sk/`, but they are not the default active theme.
+- Scientific system-prompt content is not active by default.
+
+### Planned, not implemented
+
+- Product identity cutover to default `sk` binary/artifact names and `.sk` config without environment variables.
+- `sk install-skills` command wiring and local-fixture tests.
+- `sk wiki` commands for new/list/show/lint.
+- Science-context model-tier warning/block enforcement.
+- Loop, pipeline, team, extract, and evolve modes.
 
 ---
 
@@ -260,19 +296,26 @@ The landscape survey revealed a critical gap: skill quality and evolution were a
 ---
 
 ## Revised Phased Roadmap
-### Phase 1: Foundation (Weeks 1–2) — COMPLETE
-- [x] Architecture document (this file)
-- [x] Layered architecture: Oh My Pi as vendor submodule, independent versioning (v1.0.0)
-- [x] Visual identity: violet-teal-amber palette, atom/orbit SK mark, ◉ prompt
-- [x] `scidekick install-skills` command (pulls scientific-agent-skills)
-- [x] Skill validation gate: warn/block on untested skill–model pairs, meta-skill rubric scoring
-- [x] Skill registry with per-model validation metadata (SQLite)
-- [x] Wiki backend abstraction (filesystem-based, markdown + YAML frontmatter)
-- [x] Scientific wiki schema (paper/hypothesis/experiment/evidence/insight templates)
-- [x] `research-ingest` composite skill (paper-lookup → bgpt-paper-search → wiki ingest)
-- [x] Default skill pack via install-skills command
-- [x] Model-tier guard (warn on sub-Sonnet for scientific tasks)
-- [x] System prompt with scientific capabilities
+### Phase 1: Honest Scidekick Vertical Slice — IN PROGRESS
+- [x] Architecture document with corrected implementation status
+- [x] Direct Oh My Pi fork baseline
+- [x] Localized app-name/config-dir override hook in `packages/utils/src/dirs.ts`
+- [x] GitHub release workflow builds platform binaries
+- [x] Standalone model-tier guard library with focused tests
+- [x] Standalone SQLite skill registry library with focused tests
+- [x] Standalone filesystem wiki backend with focused tests
+- [x] Scientific wiki schema templates (paper/hypothesis/experiment/evidence/insight)
+- [ ] Default product identity: `sk` app name, `.sk` config dir, `sk-*` release artifacts
+- [ ] CLI help and user-facing examples updated from `omp` to `sk`
+- [ ] `sk install-skills` registered and working against local fixture repositories
+- [ ] Skill install registry updates verified end-to-end
+- [ ] `sk wiki new/list/show/lint` command wired to `FilesystemWikiBackend`
+- [ ] Scidekick scientific system-prompt content active by default or installed without manual copying
+- [ ] Violet-teal-amber theme discoverable and selectable through the existing theme mechanism
+- [ ] Model-tier guard warns/blocks only in scientific contexts
+- [ ] Focused Scidekick CLI tests pass without network access or user-home mutation
+
+### Phase 2: Experiment Workflows
 - [ ] Loop mode: `scidekick loop <task>` (tight optimization loop)
 - [ ] Pipeline mode: `scidekick pipeline <workflow>` (fixed multi-step workflows)
 - [ ] Coordination primitives: filesystem-based queues, rosters, message boards
@@ -315,6 +358,7 @@ Consume via install command + skill compositions. Contribute improvements upstre
 ClawInstitute, while open-source, adds a dependency. Filesystem-based coordination (markdown + atomic writes) is simpler, more portable, and sufficient for MVP. Graduate to MCP server if needed.
 
 ### Don't let weak models do science
+AutoScientists empirically proved Haiku-class models fail at scientific reasoning. Enforce model-tier minimums in scientific contexts. A science harness that silently produces garbage is worse than no harness at all.
 
 ### Don't trust skills without validation
 SkillLens proved 25% of skill–target pairs cause negative transfer. Shipping skills without per-model validation is shipping bugs. Every skill in Scidekick's registry MUST carry validation metadata — which models it was tested on, what the performance delta was, and whether the meta-skill rubric was applied.
@@ -324,7 +368,6 @@ Skill extraction is a distinct capability from task execution. The best executor
 
 ### Don't let skills stagnate
 SkillOpt showed that skills can self-improve through structured feedback loops. Static skills are a missed opportunity. Scidekick's experiment mode should capture experience and feed it back into skill evolution — bounded, gated, and version-controlled.
-AutoScientists empirically proved Haiku-class models fail at scientific reasoning. Enforce model-tier minimums. A science harness that silently produces garbage is worse than no harness at all.
 
 ---
 
