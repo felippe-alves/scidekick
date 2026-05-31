@@ -66,17 +66,42 @@ if (!tagInput) {
 const version = stripVPrefix(tagInput);
 const outputPath = process.argv[3] ?? "release-notes.md";
 
-const sections: string[] = [];
-const changelogPaths = await Array.fromAsync(changelogGlob.scan("."));
-changelogPaths.sort();
 
-for (const changelogPath of changelogPaths) {
-	const content = await Bun.file(changelogPath).text();
-	const section = extractVersionSection(content, version);
-	if (!section) continue;
-	const pkgDir = changelogPath.replace(/\/CHANGELOG\.md$/, "");
-	const name = await loadPackageName(pkgDir);
-	sections.push(`## ${name}\n\n${section}`);
+async function collectSections(version: string): Promise<string[]> {
+	const sections: string[] = [];
+	const changelogPaths = await Array.fromAsync(changelogGlob.scan("."));
+	changelogPaths.sort();
+
+	for (const changelogPath of changelogPaths) {
+		const content = await Bun.file(changelogPath).text();
+		const section = extractVersionSection(content, version);
+		if (!section) continue;
+		const pkgDir = changelogPath.replace(/\/CHANGELOG\.md$/, "");
+		const name = await loadPackageName(pkgDir);
+		sections.push(`## ${name}\n\n${section}`);
+	}
+	return sections;
+}
+
+async function fallbackPackageVersion(): Promise<string | null> {
+	try {
+		const pkg = (await Bun.file("packages/coding-agent/package.json").json()) as { version?: unknown };
+		return typeof pkg.version === "string" ? pkg.version : null;
+	} catch {
+		return null;
+	}
+}
+let notesVersion = version;
+let sections = await collectSections(notesVersion);
+if (sections.length === 0 && /^1\.\d+\.\d+$/.test(version)) {
+	const packageVersion = await fallbackPackageVersion();
+	if (packageVersion) {
+		const packageSections = await collectSections(packageVersion);
+		if (packageSections.length > 0) {
+			notesVersion = packageVersion;
+			sections = packageSections;
+		}
+	}
 }
 
 if (sections.length === 0) {
@@ -89,4 +114,4 @@ if (sections.length === 0) {
 
 const body = `${sections.join("\n\n")}\n`;
 await Bun.write(outputPath, body);
-console.log(`Wrote ${sections.length} package section(s) to ${outputPath} (version ${version}).`);
+console.log(`Wrote ${sections.length} package section(s) to ${outputPath} (version ${notesVersion}).`);

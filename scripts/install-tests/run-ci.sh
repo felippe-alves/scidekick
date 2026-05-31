@@ -54,6 +54,88 @@ mkdir -p "$BINARY_DIR"
 cp packages/coding-agent/dist/sk "$BINARY_DIR/sk"
 smoke_cli "$BINARY_DIR/sk"
 
+section "Installer script binary smoke"
+INSTALL_SCRIPT_DIR="$WORK_DIR/script-install-bin"
+FAKE_BIN_DIR="$WORK_DIR/fake-bin"
+TEST_BINARY="$ROOT_DIR/packages/coding-agent/dist/sk"
+TEST_BINARY_SHA="$(shasum -a 256 "$TEST_BINARY" | sed 's/[[:space:]].*//')"
+mkdir -p "$FAKE_BIN_DIR"
+cat > "$FAKE_BIN_DIR/curl" <<'FAKECURL'
+#!/usr/bin/env bash
+set -euo pipefail
+
+out=""
+url=""
+while [ "$#" -gt 0 ]; do
+	case "$1" in
+		-o)
+			shift
+			out="$1"
+			;;
+		http://*|https://*)
+			url="$1"
+			;;
+	esac
+	shift
+done
+
+case "$url" in
+	*/releases/tags/v0.0.0-test|*/releases/latest)
+		printf '{"tag_name":"v0.0.0-test"}'
+		;;
+	*/releases/tags/v0.0.0-corrupt)
+		printf '{"tag_name":"v0.0.0-corrupt"}'
+		;;
+	*/releases/tags/v0.0.0-missing-sha)
+		printf '{"tag_name":"v0.0.0-missing-sha"}'
+		;;
+	*/releases/download/v0.0.0-test/*.sha256)
+		[ -n "$out" ] || { echo "missing -o for checksum download" >&2; exit 1; }
+		printf '%s  sk-darwin-arm64\n' "$SK_TEST_SHA256" > "$out"
+		;;
+	*/releases/download/v0.0.0-test/*)
+		[ -n "$out" ] || { echo "missing -o for binary download" >&2; exit 1; }
+		cp "$SK_TEST_BINARY" "$out"
+		;;
+	*/releases/download/v0.0.0-corrupt/*.sha256)
+		[ -n "$out" ] || { echo "missing -o for checksum download" >&2; exit 1; }
+		printf '%s  sk-darwin-arm64\n' "$SK_TEST_SHA256" > "$out"
+		;;
+	*/releases/download/v0.0.0-corrupt/*)
+		[ -n "$out" ] || { echo "missing -o for binary download" >&2; exit 1; }
+		printf '#!/bin/sh\nexit 42\n' > "$out"
+		;;
+	*/releases/download/v0.0.0-missing-sha/*.sha256)
+		exit 22
+		;;
+	*/releases/download/v0.0.0-missing-sha/*)
+		[ -n "$out" ] || { echo "missing -o for binary download" >&2; exit 1; }
+		cp "$SK_TEST_BINARY" "$out"
+		;;
+	*)
+		echo "unexpected curl URL: $url" >&2
+		exit 1
+		;;
+esac
+FAKECURL
+chmod +x "$FAKE_BIN_DIR/curl"
+PATH="$FAKE_BIN_DIR:$PATH" SK_INSTALL_DIR="$INSTALL_SCRIPT_DIR" SK_TEST_BINARY="$TEST_BINARY" SK_TEST_SHA256="$TEST_BINARY_SHA" sh scripts/install.sh --binary --ref v0.0.0-test
+smoke_cli "$INSTALL_SCRIPT_DIR/sk"
+printf '#!/bin/sh\nexit 99\n' > "$INSTALL_SCRIPT_DIR/sk"
+chmod +x "$INSTALL_SCRIPT_DIR/sk"
+PATH="$FAKE_BIN_DIR:$PATH" SK_INSTALL_DIR="$INSTALL_SCRIPT_DIR" SK_TEST_BINARY="$TEST_BINARY" SK_TEST_SHA256="$TEST_BINARY_SHA" sh scripts/install.sh --binary --ref v0.0.0-test
+smoke_cli "$INSTALL_SCRIPT_DIR/sk"
+if PATH="$FAKE_BIN_DIR:$PATH" SK_INSTALL_DIR="$INSTALL_SCRIPT_DIR" SK_TEST_BINARY="$TEST_BINARY" SK_TEST_SHA256="$TEST_BINARY_SHA" sh scripts/install.sh --binary --ref v0.0.0-corrupt; then
+	echo "corrupt binary install unexpectedly succeeded" >&2
+	exit 1
+fi
+smoke_cli "$INSTALL_SCRIPT_DIR/sk"
+if PATH="$FAKE_BIN_DIR:$PATH" SK_INSTALL_DIR="$INSTALL_SCRIPT_DIR" SK_TEST_BINARY="$TEST_BINARY" SK_TEST_SHA256="$TEST_BINARY_SHA" sh scripts/install.sh --binary --ref v0.0.0-missing-sha; then
+	echo "missing checksum install unexpectedly succeeded" >&2
+	exit 1
+fi
+smoke_cli "$INSTALL_SCRIPT_DIR/sk"
+
 section "Source install smoke"
 SOURCE_BUN_HOME="$WORK_DIR/bun-source"
 (

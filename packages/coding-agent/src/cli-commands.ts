@@ -9,6 +9,7 @@
  * regression that motivated the split.
  */
 import type { CommandEntry } from "@oh-my-pi/pi-utils/cli";
+import Doctor from "./commands/doctor";
 
 export const commands: CommandEntry[] = [
 	{ name: "launch", load: () => import("./commands/launch").then(m => m.default) },
@@ -20,6 +21,7 @@ export const commands: CommandEntry[] = [
 	{ name: "completions", load: () => import("./commands/completions").then(m => m.default) },
 	{ name: "__complete", load: () => import("./commands/complete").then(m => m.default) },
 	{ name: "config", load: () => import("./commands/config").then(m => m.default) },
+	{ name: "doctor", load: () => Promise.resolve(Doctor) },
 	{ name: "grep", load: () => import("./commands/grep").then(m => m.default) },
 	{ name: "grievances", load: () => import("./commands/grievances").then(m => m.default) },
 	{ name: "install", load: () => import("./commands/install").then(m => m.default) },

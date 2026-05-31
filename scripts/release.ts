@@ -308,9 +308,9 @@ async function cmdRelease(version: string): Promise<void> {
 	await updateChangelogsForRelease(version);
 	console.log();
 
-	// 6. Run checks
-	console.log("Running checks...");
-	await $`bun run check`;
+	// 6. Run release gates
+	console.log("Running release preflight...");
+	await $`bun run ci:release:preflight`;
 	console.log();
 
 	// 7. Commit

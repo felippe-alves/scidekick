@@ -2,6 +2,25 @@
 
 ## [Unreleased]
 
+## [15.7.4] - 2026-05-31
+### Added
+
+- Added a top-level `doctor` command with `--strict`, install-type detection, JSON output, and actionable remediation lines for PATH, config, provider, runtime, and worker failures.
+- Added release artifact integrity metadata (`SHA256SUMS`, per-binary `.sha256` files, and `manifest.json`) for compiled Scidekick binaries.
+- Added installer and upgrade smoke tests covering checksum verification, corrupt download rejection, failed-update preservation, and upgrades from published Scidekick v1.0.0.
+- Added Windows PowerShell installer smoke coverage to the release pipeline.
+
+### Changed
+
+- Changed binary updates to use GitHub release `manifest.json` metadata and verify binary size plus SHA256 before replacing the installed executable.
+- Changed release binary publishing to generate and upload checksum assets alongside every `sk-*` binary.
+- Changed release preflight to run install-method smoke tests and release-asset validation dry-runs.
+
+### Fixed
+
+- Fixed POSIX and Windows installers to verify downloaded executables before replacing installed binaries and to preserve the existing install on failed verification.
+- Fixed macOS compiled binary signing to sign `dist/sk`, the actual emitted binary.
+
 ## [15.7.3] - 2026-05-31
 ### Added
 

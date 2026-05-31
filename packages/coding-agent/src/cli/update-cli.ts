@@ -2,7 +2,7 @@
  * Update CLI command handler.
  *
  * Handles `omp update` to check for and install updates.
- * Uses bun if available, otherwise downloads binary from GitHub releases.
+ * Uses bun for package installs, or GitHub release manifests for binary installs.
  */
 import * as fs from "node:fs";
 import * as path from "node:path";
@@ -12,12 +12,44 @@ import { $ } from "bun";
 import chalk from "chalk";
 import { theme } from "../modes/theme/theme";
 
-const REPO = "can1357/oh-my-pi";
-const PACKAGE = "@oh-my-pi/pi-coding-agent";
+const REPO = "felippe-alves/scidekick";
+const PACKAGE = "@scidekick/cli";
+const RELEASE_API_BASE = Bun.env.SCIDEKICK_UPDATE_API_BASE ?? `https://api.github.com/repos/${REPO}/releases`;
+const RELEASE_DOWNLOAD_BASE = Bun.env.SCIDEKICK_UPDATE_DOWNLOAD_BASE ?? `https://github.com/${REPO}/releases/download`;
 
 interface ReleaseInfo {
 	tag: string;
 	version: string;
+}
+
+interface GitHubReleaseAsset {
+	name: string;
+	browser_download_url: string;
+}
+
+interface GitHubRelease {
+	tag_name?: string;
+	assets?: GitHubReleaseAsset[];
+}
+
+export interface ReleaseManifestArtifact {
+	name: string;
+	platform: string;
+	arch: string;
+	target: string;
+	sha256: string;
+	size: number;
+}
+
+export interface ReleaseManifest {
+	version: string;
+	generatedAt: string;
+	artifacts: ReleaseManifestArtifact[];
+}
+
+interface BinaryReleaseInfo extends ReleaseInfo {
+	manifest: ReleaseManifest;
+	assets: GitHubReleaseAsset[];
 }
 
 /** Result from running the installed binary and parsing its reported version. */
@@ -145,6 +177,64 @@ async function getLatestRelease(): Promise<ReleaseInfo> {
 	};
 }
 
+function isReleaseManifest(value: unknown): value is ReleaseManifest {
+	if (value === null || typeof value !== "object") return false;
+	const candidate = value as { version?: unknown; generatedAt?: unknown; artifacts?: unknown };
+	return (
+		typeof candidate.version === "string" &&
+		typeof candidate.generatedAt === "string" &&
+		Array.isArray(candidate.artifacts) &&
+		candidate.artifacts.every(artifact => {
+			if (artifact === null || typeof artifact !== "object") return false;
+			const item = artifact as Partial<ReleaseManifestArtifact>;
+			return (
+				typeof item.name === "string" &&
+				typeof item.platform === "string" &&
+				typeof item.arch === "string" &&
+				typeof item.target === "string" &&
+				typeof item.sha256 === "string" &&
+				typeof item.size === "number"
+			);
+		})
+	);
+}
+
+async function fetchJson(url: string): Promise<unknown> {
+	const response = await fetch(url, { redirect: "follow" });
+	if (!response.ok) throw new Error(`Failed to fetch ${url}: ${response.statusText}`);
+	return response.json();
+}
+
+async function fetchText(url: string): Promise<string> {
+	const response = await fetch(url, { redirect: "follow" });
+	if (!response.ok) throw new Error(`Failed to fetch ${url}: ${response.statusText}`);
+	return response.text();
+}
+
+function releaseAssetUrl(release: GitHubRelease, tag: string, name: string): string {
+	return (
+		release.assets?.find(asset => asset.name === name)?.browser_download_url ??
+		`${RELEASE_DOWNLOAD_BASE}/${tag}/${name}`
+	);
+}
+
+async function getLatestBinaryRelease(): Promise<BinaryReleaseInfo> {
+	const release = (await fetchJson(`${RELEASE_API_BASE}/latest`)) as GitHubRelease;
+	const tag = release.tag_name;
+	if (!tag) throw new Error("Latest GitHub release is missing tag_name");
+
+	const manifestUrl = releaseAssetUrl(release, tag, "manifest.json");
+	const manifest = await fetchJson(manifestUrl);
+	if (!isReleaseManifest(manifest)) throw new Error(`Invalid release manifest: ${manifestUrl}`);
+
+	return {
+		tag,
+		version: manifest.version,
+		manifest,
+		assets: release.assets ?? [],
+	};
+}
+
 /**
  * Compare semver versions. Returns:
  * - negative if a < b
@@ -166,10 +256,7 @@ function compareVersions(a: string, b: string): number {
 /**
  * Get the appropriate binary name for this platform.
  */
-function getBinaryName(): string {
-	const platform = process.platform;
-	const arch = process.arch;
-
+export function getBinaryNameForPlatform(platform: NodeJS.Platform, arch: NodeJS.Architecture): string {
 	let os: string;
 	switch (platform) {
 		case "linux":
@@ -198,11 +285,20 @@ function getBinaryName(): string {
 	}
 
 	if (os === "windows") {
-		return `${APP_NAME}-${os}-${archName}.exe`;
+		return `sk-${os}-${archName}.exe`;
 	}
-	return `${APP_NAME}-${os}-${archName}`;
+	return `sk-${os}-${archName}`;
 }
 
+function getBinaryName(): string {
+	return getBinaryNameForPlatform(process.platform, process.arch);
+}
+
+export function selectManifestArtifact(manifest: ReleaseManifest, binaryName: string): ReleaseManifestArtifact {
+	const artifact = manifest.artifacts.find(candidate => candidate.name === binaryName);
+	if (!artifact) throw new Error(`Release manifest does not include ${binaryName}`);
+	return artifact;
+}
 /**
  * Resolve the path that `omp` maps to in the user's PATH.
  */
@@ -261,6 +357,39 @@ async function unlinkIfExists(filePath: string): Promise<void> {
 	}
 }
 
+async function sha256File(filePath: string): Promise<string> {
+	const bytes = await Bun.file(filePath).arrayBuffer();
+	const digest = await crypto.subtle.digest("SHA-256", bytes);
+	return Array.from(new Uint8Array(digest), byte => byte.toString(16).padStart(2, "0")).join("");
+}
+
+function parseChecksumLine(text: string, artifactName: string): string {
+	const expected = text.trimStart().split(/\s+/, 1)[0];
+	if (!/^[0-9a-fA-F]{64}$/.test(expected)) {
+		throw new Error(`Invalid checksum for ${artifactName}`);
+	}
+	return expected.toLowerCase();
+}
+
+export async function verifyDownloadedArtifact(
+	filePath: string,
+	artifact: ReleaseManifestArtifact,
+	checksumText: string,
+): Promise<void> {
+	const checksumSha256 = parseChecksumLine(checksumText, artifact.name);
+	if (checksumSha256 !== artifact.sha256.toLowerCase()) {
+		throw new Error(`${artifact.name}.sha256 does not match manifest`);
+	}
+	const actual = await sha256File(filePath);
+	if (actual !== artifact.sha256.toLowerCase()) {
+		throw new Error(`Checksum verification failed for ${artifact.name}`);
+	}
+	const stat = await fs.promises.stat(filePath);
+	if (stat.size !== artifact.size) {
+		throw new Error(`Size verification failed for ${artifact.name}`);
+	}
+}
+
 /**
  * Atomically replace the installed binary and roll back if version verification fails.
  */
@@ -308,31 +437,38 @@ async function updateViaBun(expectedVersion: string): Promise<void> {
 /**
  * Download a release binary to a target path, replacing an existing file.
  */
-async function updateViaBinaryAt(targetPath: string, expectedVersion: string): Promise<void> {
+async function updateViaBinaryAt(targetPath: string, release: BinaryReleaseInfo): Promise<void> {
 	const binaryName = getBinaryName();
-	const tag = `v${expectedVersion}`;
-	const url = `https://github.com/${REPO}/releases/download/${tag}/${binaryName}`;
+	const artifact = selectManifestArtifact(release.manifest, binaryName);
+	const binaryUrl =
+		release.assets.find(asset => asset.name === binaryName)?.browser_download_url ??
+		`${RELEASE_DOWNLOAD_BASE}/${release.tag}/${binaryName}`;
+	const checksumName = `${binaryName}.sha256`;
+	const checksumUrl =
+		release.assets.find(asset => asset.name === checksumName)?.browser_download_url ??
+		`${RELEASE_DOWNLOAD_BASE}/${release.tag}/${checksumName}`;
 
 	const tempPath = `${targetPath}.new`;
 	const backupPath = `${targetPath}.bak`;
 	console.log(chalk.dim(`Downloading ${binaryName}…`));
 
-	const response = await fetch(url, { redirect: "follow" });
+	const response = await fetch(binaryUrl, { redirect: "follow" });
 	if (!response.ok || !response.body) {
 		throw new Error(`Download failed: ${response.statusText}`);
 	}
 	const fileStream = fs.createWriteStream(tempPath, { mode: 0o755 });
 	await pipeline(response.body, fileStream);
+	await verifyDownloadedArtifact(tempPath, artifact, await fetchText(checksumUrl));
 
 	console.log(chalk.dim("Installing update..."));
 	await replaceBinaryForUpdate({
 		targetPath,
 		tempPath,
 		backupPath,
-		expectedVersion,
+		expectedVersion: release.version,
 		verifyInstalledVersion,
 	});
-	printVerifiedVersion(expectedVersion);
+	printVerifiedVersion(release.version);
 	console.log(chalk.dim(`Restart ${APP_NAME} to use the new version`));
 }
 
@@ -341,11 +477,11 @@ async function updateViaBinaryAt(targetPath: string, expectedVersion: string): P
  */
 export async function runUpdateCommand(opts: { force: boolean; check: boolean }): Promise<void> {
 	console.log(chalk.dim(`Current version: ${VERSION}`));
-
-	// Check for updates
-	let release: ReleaseInfo;
+	let target: UpdateTarget;
+	let release: ReleaseInfo | BinaryReleaseInfo;
 	try {
-		release = await getLatestRelease();
+		target = await resolveUpdateTarget();
+		release = target.method === "binary" ? await getLatestBinaryRelease() : await getLatestRelease();
 	} catch (err) {
 		console.error(chalk.red(`Failed to check for updates: ${err}`));
 		process.exit(1);
@@ -365,17 +501,14 @@ export async function runUpdateCommand(opts: { force: boolean; check: boolean })
 	}
 
 	if (opts.check) {
-		// Just check, don't install
 		return;
 	}
 
-	// Choose update method based on the prioritized omp binary in PATH
 	try {
-		const target = await resolveUpdateTarget();
 		if (target.method === "bun") {
 			await updateViaBun(release.version);
 		} else {
-			await updateViaBinaryAt(target.path, release.version);
+			await updateViaBinaryAt(target.path, release as BinaryReleaseInfo);
 		}
 	} catch (err) {
 		console.error(chalk.red(`Update failed: ${err}`));

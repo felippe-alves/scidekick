@@ -213,7 +213,7 @@ describe("SessionManager temp cwd session dirs", () => {
 
 			const expectedDir = path.join(
 				getSessionsDir(),
-				`-${path.relative(os.homedir(), fs.realpathSync(aliasedCwd)).replace(/[/\\:]/g, "-")}`,
+				`-${path.relative(fs.realpathSync(os.homedir()), fs.realpathSync(aliasedCwd)).replace(/[/\\:]/g, "-")}`,
 			);
 			expect(path.dirname(sessionFile)).toBe(expectedDir);
 		} finally {

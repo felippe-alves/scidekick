@@ -51,6 +51,11 @@ const SCRATCH_ROOTS: readonly string[] = (() => {
 })();
 
 function classifyProjectDir(pwd: string): { scratch: boolean; relative: string | null } {
+	const homeDir = os.homedir();
+	if (pathIsWithin(homeDir, pwd) && !pathIsWithin(path.join(homeDir, "tmp"), pwd)) {
+		return { scratch: false, relative: null };
+	}
+
 	for (const root of SCRATCH_ROOTS) {
 		if (pathIsWithin(root, pwd)) {
 			return { scratch: true, relative: relativePathWithinRoot(root, pwd) };

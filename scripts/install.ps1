@@ -18,9 +18,11 @@ $ErrorActionPreference = "Stop"
 
 $Repo = "felippe-alves/scidekick"
 $Package = "@scidekick/cli"
-$InstallDir = if ($env:SK_INSTALL_DIR) { $env:SK_INSTALL_DIR } else { "$env:LOCALAPPDATA\\sk" }
+$InstallDir = if ($env:SK_INSTALL_DIR) { $env:SK_INSTALL_DIR } else { "$env:LOCALAPPDATA\sk" }
 $BinaryName = "sk-windows-x64.exe"
 $MinimumBunVersion = "1.3.14"
+$ReleaseApiBase = if ($env:SCIDEKICK_INSTALL_API_BASE) { $env:SCIDEKICK_INSTALL_API_BASE.TrimEnd("/") } else { "https://api.github.com/repos/$Repo/releases" }
+$ReleaseDownloadBase = if ($env:SCIDEKICK_INSTALL_DOWNLOAD_BASE) { $env:SCIDEKICK_INSTALL_DOWNLOAD_BASE.TrimEnd("/") } else { "https://github.com/$Repo/releases/download" }
 
 function Test-BunInstalled {
     try {
@@ -63,6 +65,51 @@ function Assert-BunVersion {
         $current = Get-BunVersion
         $currentText = if ($current) { $current.ToString() } else { "unknown" }
         throw "Bun $MinimumVersion or newer is required. Current version: $currentText. Upgrade Bun at https://bun.sh/docs/installation"
+    }
+}
+
+function Get-ExpectedSha256 {
+    param([string]$ChecksumPath)
+
+    $firstLine = (Get-Content -Path $ChecksumPath -TotalCount 1)
+    if (-not $firstLine) {
+        throw "Checksum file is empty"
+    }
+    $expected = ($firstLine -split "\s+")[0]
+    if ($expected -notmatch "^[0-9a-fA-F]{64}$") {
+        throw "Checksum file does not contain a valid SHA256 digest"
+    }
+    return $expected.ToLowerInvariant()
+}
+
+function Assert-Sha256 {
+    param(
+        [string]$FilePath,
+        [string]$ChecksumPath,
+        [string]$ArtifactName
+    )
+
+    $expected = Get-ExpectedSha256 $ChecksumPath
+    $actual = (Get-FileHash -Algorithm SHA256 -Path $FilePath).Hash.ToLowerInvariant()
+    if ($actual -ne $expected) {
+        throw "Checksum verification failed for $ArtifactName"
+    }
+}
+
+function Assert-Executable {
+    param(
+        [string]$FilePath,
+        [string]$Label
+    )
+
+    & $FilePath --version | Out-Null
+    if ($LASTEXITCODE -ne 0) {
+        throw "Installed $Label at $FilePath did not run --version"
+    }
+
+    & $FilePath --smoke-test | Out-Null
+    if ($LASTEXITCODE -ne 0) {
+        throw "Installed $Label at $FilePath failed the worker smoke test"
     }
 }
 
@@ -147,7 +194,7 @@ function Configure-BashShell {
         } else {
             Write-Host ""
             Write-Host "⚠ No bash shell found!" -ForegroundColor Yellow
-            Write-Host "  Scidekick requires a bash shell on Windows. Options:" -ForegroundColor Yellow
+            Write-Host "  OMP requires a bash shell on Windows. Options:" -ForegroundColor Yellow
             Write-Host "    1. Install Git for Windows: https://git-scm.com/download/win" -ForegroundColor Yellow
             Write-Host "    2. Use WSL, Cygwin, or MSYS2" -ForegroundColor Yellow
             Write-Host ""
@@ -169,77 +216,83 @@ function Install-Bun {
 }
 
 function Install-ViaBun {
-    Write-Host "Installing from source via bun..."
-    if (-not (Test-GitInstalled)) {
-        throw "git is required for source installs"
-    }
+    Write-Host "Installing via bun..."
+    if ($Ref) {
+        if (-not (Test-GitInstalled)) {
+            throw "git is required for -Ref when installing from source"
+        }
 
-    $sourceRef = if ($Ref) { $Ref } else { "main" }
-    $tmpRoot = Join-Path ([System.IO.Path]::GetTempPath()) ("sk-install-" + [System.Guid]::NewGuid().ToString("N"))
-    New-Item -ItemType Directory -Force -Path $tmpRoot | Out-Null
+        $tmpRoot = Join-Path ([System.IO.Path]::GetTempPath()) ("omp-install-" + [System.Guid]::NewGuid().ToString("N"))
+        New-Item -ItemType Directory -Force -Path $tmpRoot | Out-Null
 
-    try {
-        $repoUrl = "https://github.com/$Repo.git"
-        $cloneOk = $false
         try {
-            git clone --depth 1 --branch $sourceRef $repoUrl $tmpRoot | Out-Null
-            $cloneOk = $true
-        } catch {
+            $repoUrl = "https://github.com/$Repo.git"
             $cloneOk = $false
-        }
-
-        if (-not $cloneOk) {
-            git clone $repoUrl $tmpRoot | Out-Null
-            Push-Location $tmpRoot
             try {
-                git checkout $sourceRef | Out-Null
-            } finally {
-                Pop-Location
+                git clone --depth 1 --branch $Ref $repoUrl $tmpRoot | Out-Null
+                $cloneOk = $true
+            } catch {
+                $cloneOk = $false
             }
-        }
 
-        # Pull LFS files
-        if (Test-GitLfsInstalled) {
-            Push-Location $tmpRoot
-            try {
-                git lfs pull | Out-Null
-            } finally {
-                Pop-Location
+            if (-not $cloneOk) {
+                git clone $repoUrl $tmpRoot | Out-Null
+                Push-Location $tmpRoot
+                try {
+                    git checkout $Ref | Out-Null
+                } finally {
+                    Pop-Location
+                }
             }
-        }
 
-        $packagePath = Join-Path $tmpRoot "packages\\coding-agent"
-        if (-not (Test-Path $packagePath)) {
-            throw "Expected package at $packagePath"
-        }
+            # Pull LFS files
+            if (Test-GitLfsInstalled) {
+                Push-Location $tmpRoot
+                try {
+                    git lfs pull | Out-Null
+                } finally {
+                    Pop-Location
+                }
+            }
 
-        bun install -g $packagePath
+            $packagePath = Join-Path $tmpRoot "packages\coding-agent"
+            if (-not (Test-Path $packagePath)) {
+                throw "Expected package at $packagePath"
+            }
+
+            bun install -g $packagePath
+            if ($LASTEXITCODE -ne 0) {
+                throw "Failed to install from $packagePath via bun"
+            }
+        } finally {
+            Remove-Item -Recurse -Force $tmpRoot -ErrorAction SilentlyContinue
+        }
+    } else {
+        bun install -g $Package
         if ($LASTEXITCODE -ne 0) {
-            throw "Failed to install from $packagePath via bun"
+            throw "Failed to install $Package via bun"
         }
-    } finally {
-        Remove-Item -Recurse -Force $tmpRoot -ErrorAction SilentlyContinue
     }
 
     Write-Host ""
-    Write-Host "✓ Installed sk via bun" -ForegroundColor Green
+    Write-Host "✓ Installed omp via bun" -ForegroundColor Green
 
     Configure-BashShell
 
-    Write-Host "Run 'sk' to get started!"
+    Write-Host "Run 'omp' to get started!"
 }
 
 function Install-Binary {
     if ($Ref) {
         Write-Host "Fetching release $Ref..."
         try {
-            $Release = Invoke-RestMethod -Uri "https://api.github.com/repos/$Repo/releases/tags/$Ref"
+            $Release = Invoke-RestMethod -Uri "$ReleaseApiBase/tags/$Ref"
         } catch {
             throw "Release tag not found: $Ref`nFor branch/commit installs, use -Source with -Ref."
         }
     } else {
         Write-Host "Fetching latest release..."
-        $Release = Invoke-RestMethod -Uri "https://api.github.com/repos/$Repo/releases/latest"
+        $Release = Invoke-RestMethod -Uri "$ReleaseApiBase/latest"
     }
 
     $Latest = $Release.tag_name
@@ -250,14 +303,26 @@ function Install-Binary {
 
     New-Item -ItemType Directory -Force -Path $InstallDir | Out-Null
 
-    # Download binary
-    $BinaryUrl = "https://github.com/$Repo/releases/download/$Latest/$BinaryName"
+    # Download binary and checksum to temporary files before replacing an existing install
+    $BinaryUrl = "$ReleaseDownloadBase/$Latest/$BinaryName"
+    $ChecksumUrl = "$BinaryUrl.sha256"
     Write-Host "Downloading $BinaryName..."
     $OutPath = Join-Path $InstallDir "sk.exe"
-    Invoke-WebRequest -Uri $BinaryUrl -OutFile $OutPath
+    $TempBinary = Join-Path $InstallDir ".$BinaryName.$PID.tmp"
+    $TempChecksum = Join-Path $InstallDir ".$BinaryName.sha256.$PID.tmp"
+    try {
+        Invoke-WebRequest -Uri $BinaryUrl -OutFile $TempBinary
+        Invoke-WebRequest -Uri $ChecksumUrl -OutFile $TempChecksum
+        Assert-Sha256 -FilePath $TempBinary -ChecksumPath $TempChecksum -ArtifactName $BinaryName
+        Assert-Executable -FilePath $TempBinary -Label "downloaded sk"
+        Move-Item -Force $TempBinary $OutPath
+    } finally {
+        Remove-Item -Force -ErrorAction SilentlyContinue $TempBinary
+        Remove-Item -Force -ErrorAction SilentlyContinue $TempChecksum
+    }
 
     Write-Host ""
-    Write-Host "✓ Installed sk to $OutPath" -ForegroundColor Green
+    Write-Host "✓ Installed Scidekick to $OutPath" -ForegroundColor Green
 
     # Add to PATH if not already there
     $UserPath = [Environment]::GetEnvironmentVariable("Path", "User")
@@ -290,6 +355,11 @@ if ($Source) {
 } elseif ($Binary) {
     Install-Binary
 } else {
-    # Default: install the published GitHub release binary. npm publishing is not enabled yet.
-    Install-Binary
+    # Default: use bun if available, otherwise binary
+    if (Test-BunInstalled) {
+        Assert-BunVersion $MinimumBunVersion
+        Install-ViaBun
+    } else {
+        Install-Binary
+    }
 }
