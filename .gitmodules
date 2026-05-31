@@ -1,0 +1,4 @@
+[submodule "vendor/oh-my-pi"]
+	path = vendor/oh-my-pi
+	url = https://github.com/felippe-alves/scidekick.git
+	branch = vendor/oh-my-pi
