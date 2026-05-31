@@ -17,13 +17,13 @@ import * as path from "node:path";
 import { engines, version } from "../package.json" with { type: "json" };
 
 /** App name (e.g. "omp") */
-export const APP_NAME: string = "omp";
+export const APP_NAME: string = Bun.env.SK_APP_NAME || "omp";
 
 /** Config directory name (e.g. ".omp") */
-export const CONFIG_DIR_NAME: string = ".omp";
+export const CONFIG_DIR_NAME: string = Bun.env.SK_CONFIG_DIR || ".omp";
 
 /** Version (e.g. "1.0.0") */
-export const VERSION: string = version;
+export const VERSION: string = Bun.env.SK_VERSION || version;
 
 /** Minimum Bun version */
 export const MIN_BUN_VERSION: string = engines.bun.replace(/[^0-9.]/g, "");
