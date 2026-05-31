@@ -20,6 +20,13 @@ function makeTempDir(): string {
 	return fs.mkdtempSync(path.join(os.tmpdir(), "omp-bash-exec-"));
 }
 
+async function waitUntil(predicate: () => boolean, timeoutMs = 1000): Promise<void> {
+	const deadline = performance.now() + timeoutMs;
+	while (!predicate() && performance.now() < deadline) {
+		await Bun.sleep(10);
+	}
+}
+
 describe("executeBash", () => {
 	let tempDir: string;
 
@@ -192,7 +199,7 @@ describe("executeBash", () => {
 			signal: controller.signal,
 			sessionKey: "hung-native-abort",
 		});
-		await Bun.sleep(50);
+		await waitUntil(() => interceptedRuns === 1);
 		controller.abort();
 
 		const raced = await Promise.race([
