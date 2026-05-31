@@ -173,12 +173,13 @@ describe("executeBash", () => {
 		}
 
 		const originalRun = piNatives.Shell.prototype.run;
-		let runCalls = 0;
+		const resolvedTempDir = fs.realpathSync(tempDir);
+		let interceptedRuns = 0;
 		vi.spyOn(piNatives.Shell.prototype, "run").mockImplementation(function (this: Shell, options, onChunk) {
-			runCalls++;
-			if (runCalls === 1) {
+			if (options.command.includes("sleep 10") && options.cwd === resolvedTempDir && interceptedRuns === 0) {
+				interceptedRuns++;
 				onChunk?.(null, "started\n");
-				return new Promise(() => {});
+				return Promise.withResolvers<never>().promise;
 			}
 			return originalRun.call(this, options, onChunk);
 		});
@@ -211,7 +212,7 @@ describe("executeBash", () => {
 			sessionKey: "hung-native-abort",
 		});
 		expect(next.output.trim()).toBe("next");
-		expect(runCalls).toBe(1);
+		expect(interceptedRuns).toBe(1);
 	});
 
 	it("restores persistent sessions after native abort cleanup settles", async () => {
@@ -220,9 +221,14 @@ describe("executeBash", () => {
 		}
 
 		const nativeResult = Promise.withResolvers<{ exitCode: undefined; cancelled: true; timedOut: false }>();
-		vi.spyOn(piNatives.Shell.prototype, "run").mockImplementation((_options, onChunk) => {
-			onChunk?.(null, "started\n");
-			return nativeResult.promise;
+		const originalRun = piNatives.Shell.prototype.run;
+		const resolvedTempDir = fs.realpathSync(tempDir);
+		vi.spyOn(piNatives.Shell.prototype, "run").mockImplementation(function (this: Shell, options, onChunk) {
+			if (options.command.includes("sleep 10") && options.cwd === resolvedTempDir) {
+				onChunk?.(null, "started\n");
+				return nativeResult.promise;
+			}
+			return originalRun.call(this, options, onChunk);
 		});
 		vi.spyOn(piNatives.Shell.prototype, "abort").mockResolvedValue();
 
@@ -259,9 +265,14 @@ describe("executeBash", () => {
 			return;
 		}
 
-		vi.spyOn(piNatives.Shell.prototype, "run").mockImplementation((_options, onChunk) => {
-			onChunk?.(null, "started\n");
-			return new Promise(() => {});
+		const originalRun = piNatives.Shell.prototype.run;
+		const resolvedTempDir = fs.realpathSync(tempDir);
+		vi.spyOn(piNatives.Shell.prototype, "run").mockImplementation(function (this: Shell, options, onChunk) {
+			if (options.command.includes("sleep 10") && options.cwd === resolvedTempDir) {
+				onChunk?.(null, "started\n");
+				return Promise.withResolvers<never>().promise;
+			}
+			return originalRun.call(this, options, onChunk);
 		});
 		vi.spyOn(piNatives.Shell.prototype, "abort").mockResolvedValue();
 
