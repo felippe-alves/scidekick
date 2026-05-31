@@ -324,7 +324,6 @@ jobs:
    release_binary:
       if: ${{ needs.gate.outputs.is-release == 'true' && !cancelled() &&
          needs.native_linux.result == 'success' && needs.native_release.result ==
-         'success' && needs.test.result == 'success' && needs.check.result ==
          'success' && needs.check.result == 'success' }}
       needs: [gate, check, native_linux, native_release, rust-hash]
       strategy:
