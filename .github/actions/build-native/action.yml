@@ -53,7 +53,7 @@ runs:
       # artifacts, causing macOS x64 baseline to rebuild forever.
       #
       # Include the native source hash in the shared key as well: rust-cache's
-      # lockfile scan misses the workspace root Cargo.toml version that Cargo
+      # lockfile scan misses the workspace root vendor/oh-my-pi/Cargo.toml version that Cargo
       # fingerprints for workspace crates. Without it, release version bumps can
       # get an exact hit for artifacts Cargo must rebuild.
       #
@@ -177,7 +177,7 @@ runs:
         uses: actions/upload-artifact@v4
         with:
            name: pi-natives-${{ inputs.platform }}-${{ inputs.arch }}${{ inputs.variant && format('-{0}', inputs.variant) || '' }}-h${{ inputs.hash }}
-           path: packages/natives/native/pi_natives.${{ inputs.platform }}-${{ inputs.arch }}*.node
+           path: vendor/oh-my-pi/packages/natives/native/pi_natives.${{ inputs.platform }}-${{ inputs.arch }}*.node
            if-no-files-found: error
            # Explicit so the rust-hash canary lookup keeps working even if org
            # defaults shift; bump if Rust source ever stays stable for >90 days
