@@ -3,7 +3,7 @@
 import * as path from "node:path";
 
 const packageDir = path.join(import.meta.dir, "..");
-const outputPath = path.join(packageDir, "dist", "omp");
+const outputPath = path.join(packageDir, "dist", "sk");
 
 function shouldAdhocSignDarwinBinary(): boolean {
 	return process.platform === "darwin";
@@ -74,7 +74,7 @@ async function main(): Promise<void> {
 					"./src/extensibility/legacy-pi-ai-shim.ts",
 					"./src/extensibility/legacy-pi-coding-agent-shim.ts",
 					"--outfile",
-					"dist/omp",
+					"dist/sk",
 				],
 				buildEnv,
 			);

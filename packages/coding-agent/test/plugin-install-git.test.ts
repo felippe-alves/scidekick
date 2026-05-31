@@ -46,7 +46,7 @@ describe("PluginManager.install with git sources", () => {
 		vi.spyOn(piUtils, "getPluginsDir").mockReturnValue(pluginsDir);
 		vi.spyOn(piUtils, "getPluginsNodeModules").mockReturnValue(pluginsNodeModules);
 		vi.spyOn(piUtils, "getPluginsPackageJson").mockReturnValue(pluginsPkgJson);
-		vi.spyOn(piUtils, "getPluginsLockfile").mockReturnValue(path.join(tmpRoot, "omp-plugins.lock.json"));
+		vi.spyOn(piUtils, "getPluginsLockfile").mockReturnValue(path.join(tmpRoot, "sk-plugins.lock.json"));
 		vi.spyOn(piUtils, "getProjectDir").mockReturnValue(tmpRoot);
 		vi.spyOn(piUtils, "getProjectPluginOverridesPath").mockReturnValue(path.join(tmpRoot, "plugin-overrides.json"));
 	});
@@ -59,10 +59,7 @@ describe("PluginManager.install with git sources", () => {
 	test("installs from github: shorthand and resolves real package name from deps diff", async () => {
 		// Seed the plugins manifest so install()'s `depsBefore` snapshot is empty
 		// rather than triggering #ensurePackageJson's bootstrap path.
-		await Bun.write(
-			pluginsPkgJson,
-			JSON.stringify({ name: "omp-plugins", private: true, dependencies: {} }, null, 2),
-		);
+		await Bun.write(pluginsPkgJson, JSON.stringify({ name: "sk-plugins", private: true, dependencies: {} }, null, 2));
 
 		vi.spyOn(Bun, "spawn").mockImplementation(((cmd: string[]) => {
 			// Verify the manager forwards the spec verbatim to bun install.
@@ -78,7 +75,7 @@ describe("PluginManager.install with git sources", () => {
 					pluginsPkgJson,
 					JSON.stringify(
 						{
-							name: "omp-plugins",
+							name: "sk-plugins",
 							private: true,
 							dependencies: { "real-name": "github:foo/bar" },
 						},
@@ -112,10 +109,7 @@ describe("PluginManager.install with git sources", () => {
 	});
 
 	test("normalizes non-GitHub shorthand before invoking bun install", async () => {
-		await Bun.write(
-			pluginsPkgJson,
-			JSON.stringify({ name: "omp-plugins", private: true, dependencies: {} }, null, 2),
-		);
+		await Bun.write(pluginsPkgJson, JSON.stringify({ name: "sk-plugins", private: true, dependencies: {} }, null, 2));
 
 		vi.spyOn(Bun, "spawn").mockImplementation(((cmd: string[]) => {
 			expect(cmd[0]).toBe("bun");
@@ -127,7 +121,7 @@ describe("PluginManager.install with git sources", () => {
 					pluginsPkgJson,
 					JSON.stringify(
 						{
-							name: "omp-plugins",
+							name: "sk-plugins",
 							private: true,
 							dependencies: {
 								"gitlab-plugin": "git+https://gitlab.com/group/sub/project.git#v1.0.0",

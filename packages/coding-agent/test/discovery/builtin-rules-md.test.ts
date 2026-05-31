@@ -1,7 +1,7 @@
 /**
  * Regression test for #1266:
  * `RULES.md` (singular, top-level) MUST be loaded as a sticky always-apply rule
- * from both `~/.omp/agent/RULES.md` (user) and the nearest `.omp/RULES.md`
+ * from both `~/.sk/agent/RULES.md` (user) and the nearest `.sk/RULES.md`
  * (project, walked up from cwd to repoRoot).
  *
  * Calls the native provider's `load` directly to bypass `loadCapability`'s
@@ -51,9 +51,9 @@ afterEach(() => {
 	fs.rmSync(tempDir, { recursive: true, force: true });
 });
 
-test("user ~/.omp/agent/RULES.md becomes an alwaysApply rule", async () => {
+test("user ~/.sk/agent/RULES.md becomes an alwaysApply rule", async () => {
 	writeFile(
-		path.join(home, ".omp", "agent", "RULES.md"),
+		path.join(home, ".sk", "agent", "RULES.md"),
 		"**CRITICAL**: You _MUST_ use beads task tracker for any project\n",
 	);
 
@@ -66,7 +66,7 @@ test("user ~/.omp/agent/RULES.md becomes an alwaysApply rule", async () => {
 });
 
 test("project .omp/RULES.md becomes an alwaysApply rule", async () => {
-	writeFile(path.join(project, ".omp", "RULES.md"), "# Project rule\nAlways say hi.\n");
+	writeFile(path.join(project, ".sk", "RULES.md"), "# Project rule\nAlways say hi.\n");
 
 	const rules = await loadNativeRules({ cwd: project, home, repoRoot: project });
 
@@ -79,18 +79,18 @@ test("project .omp/RULES.md becomes an alwaysApply rule", async () => {
 test("project RULES.md is found walking up from a sub-package cwd", async () => {
 	const subPkg = path.join(project, "packages", "app");
 	fs.mkdirSync(subPkg, { recursive: true });
-	writeFile(path.join(project, ".omp", "RULES.md"), "# Repo-wide sticky rule\n");
+	writeFile(path.join(project, ".sk", "RULES.md"), "# Repo-wide sticky rule\n");
 
 	const rules = await loadNativeRules({ cwd: subPkg, home, repoRoot: project });
 
 	const projectRule = rules.find(r => r._source.level === "project" && r.name === "RULES");
 	expect(projectRule).toBeDefined();
 	expect(projectRule?.alwaysApply).toBe(true);
-	expect(projectRule?.path).toBe(path.join(project, ".omp", "RULES.md"));
+	expect(projectRule?.path).toBe(path.join(project, ".sk", "RULES.md"));
 });
 
 test("alwaysApply is forced even when frontmatter says false", async () => {
-	writeFile(path.join(home, ".omp", "agent", "RULES.md"), "---\nalwaysApply: false\n---\nStick around anyway.\n");
+	writeFile(path.join(home, ".sk", "agent", "RULES.md"), "---\nalwaysApply: false\n---\nStick around anyway.\n");
 
 	const rules = await loadNativeRules({ cwd: project, home, repoRoot: project });
 
@@ -101,7 +101,7 @@ test("alwaysApply is forced even when frontmatter says false", async () => {
 
 test("absent RULES.md does not produce a rule", async () => {
 	// No RULES.md anywhere — only a sibling .omp/rules/ to make sure the directory exists.
-	writeFile(path.join(home, ".omp", "agent", "rules", "other.md"), "# Unrelated rule\n");
+	writeFile(path.join(home, ".sk", "agent", "rules", "other.md"), "# Unrelated rule\n");
 
 	const rules = await loadNativeRules({ cwd: project, home, repoRoot: project });
 

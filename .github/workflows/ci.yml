@@ -335,35 +335,35 @@ jobs:
                     platform: linux,
                     arch: x64,
                     target_id: linux-x64,
-                    binary_path: packages/coding-agent/binaries/omp-linux-x64,
+                    binary_path: packages/coding-agent/binaries/sk-linux-x64,
                  }
                - {
                     os: ubuntu-24.04-arm,
                     platform: linux,
                     arch: arm64,
                     target_id: linux-arm64,
-                    binary_path: packages/coding-agent/binaries/omp-linux-arm64,
+                    binary_path: packages/coding-agent/binaries/sk-linux-arm64,
                  }
                - {
                     os: macos-15-intel,
                     platform: darwin,
                     arch: x64,
                     target_id: darwin-x64,
-                    binary_path: packages/coding-agent/binaries/omp-darwin-x64,
+                    binary_path: packages/coding-agent/binaries/sk-darwin-x64,
                  }
                - {
                     os: macos-14,
                     platform: darwin,
                     arch: arm64,
                     target_id: darwin-arm64,
-                    binary_path: packages/coding-agent/binaries/omp-darwin-arm64,
+                    binary_path: packages/coding-agent/binaries/sk-darwin-arm64,
                  }
                - {
                     os: ubuntu-22.04,
                     platform: win32,
                     arch: x64,
                     target_id: win32-x64,
-                    binary_path: packages/coding-agent/binaries/omp-windows-x64.exe,
+                    binary_path: packages/coding-agent/binaries/sk-windows-x64.exe,
                  }
       runs-on: ${{ matrix.os }}
       permissions:
@@ -428,7 +428,7 @@ jobs:
          - name: Upload release binary artifact
            uses: actions/upload-artifact@v4
            with:
-              name: omp-binary-${{ matrix.target_id }}
+              name: sk-binary-${{ matrix.target_id }}
               path: ${{ matrix.binary_path }}
 
    release-github:
@@ -448,7 +448,7 @@ jobs:
          - name: Download release binaries
            uses: actions/download-artifact@v4
            with:
-              pattern: omp-binary-*
+              pattern: sk-binary-*
               path: packages/coding-agent/binaries
               merge-multiple: true
          - name: Create GitHub Release
@@ -456,7 +456,7 @@ jobs:
            with:
               tag_name: ${{ needs.gate.outputs.release-tag }}
               files: |
-                 packages/coding-agent/binaries/omp-*
+                 packages/coding-agent/binaries/sk-*
               body_path: release-notes.md
               generate_release_notes: true
 
@@ -471,13 +471,13 @@ jobs:
       steps:
          - name: Download published macOS arm64 binary
            run: |
-              curl -fsSL -o omp-darwin-arm64 "https://github.com/${{ github.repository }}/releases/download/${{ needs.gate.outputs.release-tag }}/omp-darwin-arm64"
-              chmod +x omp-darwin-arm64
+              curl -fsSL -o sk-darwin-arm64 "https://github.com/${{ github.repository }}/releases/download/${{ needs.gate.outputs.release-tag }}/sk-darwin-arm64"
+              chmod +x sk-darwin-arm64
          - name: Verify published macOS arm64 binary
            run: |
-              codesign -dv ./omp-darwin-arm64
+              codesign -dv ./sk-darwin-arm64
               runtime_dir="$(mktemp -d)"
-              HOME="$runtime_dir/home" XDG_DATA_HOME="$runtime_dir/xdg" ./omp-darwin-arm64 --version
+              HOME="$runtime_dir/home" XDG_DATA_HOME="$runtime_dir/xdg" ./sk-darwin-arm64 --version
 
    release-npm:
       if: ${{ needs.gate.outputs.is-release == 'true' && !cancelled() &&

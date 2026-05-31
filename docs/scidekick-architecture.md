@@ -10,8 +10,8 @@ This document is partly aspirational. The checked roadmap below has been correct
 
 ### Implemented and working
 
-- Direct Oh My Pi fork with a localized app-name/config-dir override in `packages/utils/src/dirs.ts`.
-- Source CLI can identify as `sk` when `SK_APP_NAME=sk` is set.
+- Direct Oh My Pi fork with localized Scidekick product identity defaults in `packages/utils/src/dirs.ts`.
+- Source CLI identifies as `sk` by default and uses `.sk` as the default config directory.
 - Standalone Scidekick packages exist:
   - `packages/scidekick-science`
   - `packages/scidekick-guard`
@@ -20,6 +20,7 @@ This document is partly aspirational. The checked roadmap below has been correct
 - `packages/scidekick-science` provides a tested filesystem wiki backend plus schema templates.
 - `site/index.html` exists as a static landing page.
 - The release workflow currently builds and publishes GitHub release binaries; the full `test` job has one inherited Oh My Pi failure in `packages/coding-agent/test/bash-executor.test.ts`.
+- Release workflow configuration now names compiled artifacts `sk-*`.
 
 ### Implemented but not wired into the product
 
@@ -305,8 +306,8 @@ The landscape survey revealed a critical gap: skill quality and evolution were a
 - [x] Standalone SQLite skill registry library with focused tests
 - [x] Standalone filesystem wiki backend with focused tests
 - [x] Scientific wiki schema templates (paper/hypothesis/experiment/evidence/insight)
-- [ ] Default product identity: `sk` app name, `.sk` config dir, `sk-*` release artifacts
-- [ ] CLI help and user-facing examples updated from `omp` to `sk`
+- [x] Default product identity: `sk` app name, `.sk` config dir, `sk-*` release artifact configuration
+- [x] CLI help and user-facing examples updated from `omp` to `sk`
 - [ ] `sk install-skills` registered and working against local fixture repositories
 - [ ] Skill install registry updates verified end-to-end
 - [ ] `sk wiki new/list/show/lint` command wired to `FilesystemWikiBackend`

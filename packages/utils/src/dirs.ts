@@ -1,14 +1,14 @@
 /**
- * Centralized path helpers for omp config directories.
+ * Centralized path helpers for Scidekick config directories.
  *
- * Uses PI_CONFIG_DIR (default ".omp") for the config root and
+ * Uses PI_CONFIG_DIR/SK_CONFIG_DIR (default ".sk") for the config root and
  * PI_CODING_AGENT_DIR to override the agent directory.
  *
- * On Linux, if XDG_DATA_HOME / XDG_STATE_HOME / XDG_CACHE_HOME environment
- * variables are set, paths are redirected to XDG-compliant locations under
- * $XDG_*_HOME/omp/. This requires running `omp config migrate` first to
- * move data to the new locations. No filesystem existence checks are performed
- * — if the env var is set, omp trusts that the migration has been done.
+ * On Linux/macOS, if XDG_DATA_HOME / XDG_STATE_HOME / XDG_CACHE_HOME
+ * environment variables are set, paths are redirected to XDG-compliant
+ * locations under $XDG_*_HOME/sk/. This requires running `sk config migrate`
+ * first to move data to the new locations. No filesystem existence checks are
+ * performed — if the env var is set, Scidekick trusts that migration is done.
  */
 
 import * as fs from "node:fs";
@@ -16,14 +16,14 @@ import * as os from "node:os";
 import * as path from "node:path";
 import { engines, version } from "../package.json" with { type: "json" };
 
-/** App name (e.g. "omp") */
-export const APP_NAME: string = Bun.env.SK_APP_NAME || "omp";
+/** App name (e.g. "sk") */
+export const APP_NAME: string = Bun.env.SK_APP_NAME || "sk";
 
-/** Config directory name (e.g. ".omp") */
-export const CONFIG_DIR_NAME: string = Bun.env.SK_CONFIG_DIR || ".omp";
+/** Config directory name (e.g. ".sk") */
+export const CONFIG_DIR_NAME: string = Bun.env.SK_CONFIG_DIR || ".sk";
 
 /** Version (e.g. "1.0.0") */
-export const VERSION: string = version;
+export const VERSION: string = Bun.env.SK_VERSION || version;
 
 /** Minimum Bun version */
 export const MIN_BUN_VERSION: string = engines.bun.replace(/[^0-9.]/g, "");
@@ -94,12 +94,12 @@ export function setProjectDir(dir: string): void {
 	process.chdir(projectDir);
 }
 
-/** Get the config directory name relative to home (e.g. ".omp" or PI_CONFIG_DIR override). */
+/** Get the config directory name relative to home (e.g. ".sk" or config-dir env override). */
 export function getConfigDirName(): string {
-	return process.env.PI_CONFIG_DIR || CONFIG_DIR_NAME;
+	return process.env.SK_CONFIG_DIR || process.env.PI_CONFIG_DIR || CONFIG_DIR_NAME;
 }
 
-/** Get the config agent directory name relative to home (e.g. ".omp/agent" or PI_CONFIG_DIR + "/agent"). */
+/** Get the config agent directory name relative to home (e.g. ".sk/agent" or PI_CONFIG_DIR + "/agent"). */
 export function getConfigAgentDirName(): string {
 	return `${getConfigDirName()}/agent`;
 }
@@ -111,10 +111,10 @@ export function getConfigAgentDirName(): string {
 type XdgCategory = "data" | "state" | "cache";
 
 /**
- * Resolves and caches all omp directory paths. On Linux, when XDG environment
- * variables are set, paths are redirected under $XDG_*_HOME/omp/. A new
- * instance is created whenever the agent directory changes, which naturally
- * invalidates all cached paths.
+ * Resolves and caches all Scidekick directory paths. On Linux/macOS, when XDG
+ * environment variables are set, paths are redirected under $XDG_*_HOME/sk/.
+ * A new instance is created whenever the agent directory changes, which
+ * naturally invalidates all cached paths.
  */
 class DirResolver {
 	readonly configRoot: string;
@@ -163,7 +163,7 @@ class DirResolver {
 			state: xdgState ?? this.configRoot,
 			cache: xdgCache ?? this.configRoot,
 		};
-		// XDG flattens the agent/ prefix: ~/.omp/agent/sessions → $XDG_DATA_HOME/omp/sessions
+		// XDG flattens the agent/ prefix: ~/.sk/agent/sessions → $XDG_DATA_HOME/sk/sessions
 		this.#agentDirs = {
 			data: xdgData ?? this.agentDir,
 			state: xdgState ?? this.agentDir,
@@ -207,7 +207,7 @@ const RESOLVER_HOME = os.homedir();
 // Root directories
 // =============================================================================
 
-/** Get the config root directory (~/.omp). */
+/** Get the config root directory (~/.sk). */
 export function getConfigRootDir(): string {
 	return dirs.configRoot;
 }
@@ -218,14 +218,14 @@ export function setAgentDir(dir: string): void {
 	process.env.PI_CODING_AGENT_DIR = dir;
 }
 
-/** Get the agent config directory (~/.omp/agent). */
+/** Get the agent config directory (~/.sk/agent). */
 export function getAgentDir(): string {
 	return dirs.agentDir;
 }
 
-/** Get the project-local config directory (.omp). */
+/** Get the project-local config directory (.sk). */
 export function getProjectAgentDir(cwd: string = getProjectDir()): string {
-	return path.join(cwd, CONFIG_DIR_NAME);
+	return path.join(cwd, getConfigDirName());
 }
 
 // =============================================================================
@@ -274,9 +274,9 @@ export function getPluginsPackageJson(home?: string): string {
 	return path.join(getPluginsDir(home), "package.json");
 }
 
-/** Plugin lock file (~/.omp/plugins/omp-plugins.lock.json). */
+/** Plugin lock file (~/.sk/plugins/sk-plugins.lock.json). */
 export function getPluginsLockfile(home?: string): string {
-	return path.join(getPluginsDir(home), "omp-plugins.lock.json");
+	return path.join(getPluginsDir(home), `${APP_NAME}-plugins.lock.json`);
 }
 
 /** Get the remote mount directory (~/.omp/remote). */
