@@ -3,7 +3,7 @@ import * as fs from "node:fs";
 import * as os from "node:os";
 import * as path from "node:path";
 import { resetSettingsForTest, Settings } from "@oh-my-pi/pi-coding-agent/config/settings";
-import { executeBash } from "@oh-my-pi/pi-coding-agent/exec/bash-executor";
+import { __resetExecuteBashSessionsForTests, executeBash } from "@oh-my-pi/pi-coding-agent/exec/bash-executor";
 import { DEFAULT_MAX_BYTES } from "@oh-my-pi/pi-coding-agent/session/streaming-output";
 import * as shellSnapshot from "@oh-my-pi/pi-coding-agent/utils/shell-snapshot";
 import type { Shell } from "@oh-my-pi/pi-natives";
@@ -29,7 +29,8 @@ describe("executeBash", () => {
 		await Settings.init({ inMemory: true, cwd: tempDir });
 	});
 
-	afterEach(() => {
+	afterEach(async () => {
+		await __resetExecuteBashSessionsForTests();
 		resetSettingsForTest();
 		vi.restoreAllMocks();
 		if (fs.existsSync(tempDir)) {

@@ -294,6 +294,13 @@ export async function executeBash(command: string, options?: BashExecutorOptions
 	}
 }
 
+export async function __resetExecuteBashSessionsForTests(): Promise<void> {
+	const sessions = [...shellSessions.values()];
+	shellSessions.clear();
+	brokenShellSessions.clear();
+	await Promise.allSettled(sessions.map(session => session.abort().catch(() => undefined)));
+}
+
 function buildSessionKey(
 	shell: string,
 	prefix: string | undefined,

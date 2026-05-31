@@ -6,7 +6,7 @@
 <meta name="color-scheme" content="light">
 <meta name="theme-color" content="#ffffff">
 <title>Scidekick — AI Research Catalyst</title>
-<meta name="description" content="An open-source AI research harness. Execute experiments, manage a scientific wiki, and orchestrate agent teams — all from the terminal.">
+<meta name="description" content="An open-source AI research harness. Install scientific skills, manage a filesystem-backed research wiki, and build on the Oh My Pi agent platform from the terminal.">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230b0a14'/%3E%3Ctext x='32' y='44' text-anchor='middle' font-size='36' fill='%237C5CFC'%3E%E2%97%89%3C/text%3E%3C/svg%3E">
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -498,9 +498,9 @@ footer a:hover { color: var(--accent); }
     </h1>
 
     <p class="hero-sub fade-up">
-      Execute experiments. Manage a scientific wiki. Orchestrate agent teams.
-      Skills that self-improve. The first open-source harness that treats
-      language models as scientific collaborators.
+      Install scientific skills. Manage a filesystem-backed research wiki.
+      Build on the full Oh My Pi agent platform while the higher-level
+      scientific orchestration layers come online.
     </p>
 
     <div class="fade-up">
@@ -517,7 +517,7 @@ footer a:hover { color: var(--accent); }
         <span class="sep">·</span>
         <span>macOS · Linux · Windows</span>
         <span class="sep">·</span>
-        <span>bun ≥ 1.3</span>
+        <span>default: release binary · Bun only for --source</span>
         <span class="sep">·</span>
         <a href="https://github.com/felippe-alves/scidekick">source ↗</a>
       </div>
@@ -646,9 +646,9 @@ footer a:hover { color: var(--accent); }
             <span class="dot-r"></span><span class="dot-y"></span><span class="dot-g"></span>
           </div>
           <div class="code-body">
-            <span class="ln"><span class="p">◉</span> <span class="c">sk wiki ingest</span> <span class="a">--type hypothesis</span>  <span class="cm"># save a hypothesis</span></span>
-            <span class="ln"><span class="p">◉</span> <span class="c">sk wiki query</span> <span class="a">--search "catalyst"</span>  <span class="cm"># search the wiki</span></span>
-            <span class="ln"><span class="p">◉</span> <span class="c">sk wiki lint</span> <span class="a">--slug my-hypothesis</span>  <span class="cm"># validate</span></span>
+            <span class="ln"><span class="p">◉</span> <span class="c">sk wiki new</span> <span class="a">hypothesis "Catalyst idea"</span>  <span class="cm"># create an entry</span></span>
+            <span class="ln"><span class="p">◉</span> <span class="c">sk wiki list</span>                                <span class="cm"># list entries</span></span>
+            <span class="ln"><span class="p">◉</span> <span class="c">sk wiki lint</span> <span class="a">catalyst-idea</span>               <span class="cm"># validate</span></span>
           </div>
         </div>
       </div>
@@ -685,50 +685,49 @@ footer a:hover { color: var(--accent); }
 <!-- ── 03 Skills ── -->
 <section class="section" id="skills">
   <div class="wrap">
-    <div class="section-num">§ 03 — Self-evolving skills</div>
+    <div class="section-num">§ 03 — Installable skills</div>
     <div class="feat-grid">
       <div class="feat-body">
-        <h2>Skills that get<br><em>better with use.</em></h2>
-        <p class="desc">Natural-language skills are trainable artifacts — not static prompts. Scidekick implements the SkillOpt loop (MSR 2026) so protocols improve as you run more experiments.</p>
-        <p class="detail"><strong style="color:var(--ink)">Rollout</strong> — execute tasks with the current skill, recording scored trajectories.</p>
-        <p class="detail"><strong style="color:var(--ink)">Reflect</strong> — analyze success and failure minibatches separately. Fix recurring errors, preserve working behavior.</p>
-        <p class="detail"><strong style="color:var(--ink)">Bounded edit</strong> — propose add/delete/replace operations under an edit budget. The textual learning rate prevents destructive rewrites.</p>
-        <p class="detail"><strong style="color:var(--ink)">Gate</strong> — accept edits only when they improve held-out performance. Turns reflection into propose-and-test optimization.</p>
+        <h2>Scientific skills.<br><em>Installed, not reinvented.</em></h2>
+        <p class="desc">Scidekick consumes the existing Agent Skills ecosystem instead of creating a parallel one. Today the product slice supports listing and installing science-focused skills from a Git repository into the standard skill discovery paths.</p>
+        <p class="detail"><strong style="color:var(--ink)">Local or remote</strong> — install from a GitHub repo, shorthand, or local fixture repository.</p>
+        <p class="detail"><strong style="color:var(--ink)">Discovery-compatible</strong> — installed skills land in the same directories the agent already scans.</p>
+        <p class="detail"><strong style="color:var(--ink)">Tracked</strong> — every install is recorded in SQLite so validation metadata can be layered on next.</p>
         <div class="code-block">
           <div class="code-header">
             <span class="dot-r"></span><span class="dot-y"></span><span class="dot-g"></span>
           </div>
           <div class="code-body">
-            <span class="ln"><span class="p">◉</span> <span class="c">sk install-skills</span>              <span class="cm"># pull science skills</span></span>
-            <span class="ln"><span class="p">◉</span> <span class="c">sk install-skills</span> <span class="a">--list</span>       <span class="cm"># preview available</span></span>
-            <span class="ln"><span class="p">◉</span> <span class="c">sk evolve</span> <span class="a">my-protocol</span>          <span class="cm"># self-improve a skill</span></span>
+            <span class="ln"><span class="p">◉</span> <span class="c">sk install-skills</span>                            <span class="cm"># install the default science pack</span></span>
+            <span class="ln"><span class="p">◉</span> <span class="c">sk install-skills</span> <span class="a">--list</span>                     <span class="cm"># preview available skills</span></span>
+            <span class="ln"><span class="p">◉</span> <span class="c">sk install-skills</span> <span class="a">--from ./skills-repo</span>       <span class="cm"># install from a local repo</span></span>
           </div>
         </div>
       </div>
       <div class="spec-panel">
         <div class="spec-row">
-          <span class="spec-key">Loop</span>
-          <span class="spec-val">rollout → reflect → edit → gate</span>
-        </div>
-        <div class="spec-row">
-          <span class="spec-key">Budget</span>
-          <span class="spec-val">bounded text edits</span>
-        </div>
-        <div class="spec-row">
-          <span class="spec-key">Buffer</span>
-          <span class="spec-val">rejected edits = negative feedback</span>
-        </div>
-        <div class="spec-row">
-          <span class="spec-key">Memory</span>
-          <span class="spec-val">slow update + meta-skill</span>
-        </div>
-        <div class="spec-row">
-          <span class="spec-key">Cross-model</span>
-          <span class="spec-val">skills transfer between models</span>
-        </div>
-        <div class="spec-row">
           <span class="spec-key">Source</span>
-          <span class="spec-val">SkillOpt · MSR 2026</span>
+          <span class="spec-val">Git repo · local path · GitHub shorthand</span>
+        </div>
+        <div class="spec-row">
+          <span class="spec-key">Install target</span>
+          <span class="spec-val">~/.sk/agent/skills or ./.sk/skills</span>
+        </div>
+        <div class="spec-row">
+          <span class="spec-key">Format</span>
+          <span class="spec-val">SKILL.md + directory payload</span>
+        </div>
+        <div class="spec-row">
+          <span class="spec-key">Registry</span>
+          <span class="spec-val">SQLite in agent.db</span>
+        </div>
+        <div class="spec-row">
+          <span class="spec-key">Validation</span>
+          <span class="spec-val">metadata groundwork now · enforcement next</span>
+        </div>
+        <div class="spec-row">
+          <span class="spec-key">Ecosystem</span>
+          <span class="spec-val">Agent Skills compatible</span>
         </div>
       </div>
     </div>
@@ -742,16 +741,17 @@ footer a:hover { color: var(--accent); }
     <div class="feat-grid">
       <div class="feat-body">
         <h2>Don't let weak models<br><em>do science.</em></h2>
-        <p class="desc">AutoScientists (MIMS Harvard, 2026) proved that Haiku-class models fail catastrophically at scientific reasoning — they hallucinate API unavailability and "describe instead of do."</p>
-        <p class="detail">Scidekick classifies every model into <strong style="color:var(--ink)">haiku</strong>, <strong style="color:var(--ink)">sonnet</strong>, or <strong style="color:var(--ink)">opus</strong> tiers based on model ID heuristics. When a Haiku-class model loads, you get a warning before any science task runs. Configurable to hard-block.</p>
-        <p class="detail">DeepSeek V3? Sonnet-tier. GPT-4o-mini? Haiku — warned. Claude Sonnet? Cleared. The guard updates automatically as new models ship.</p>
+        <p class="desc">AutoScientists (MIMS Harvard, 2026) proved that Haiku-class models fail catastrophically at scientific reasoning — they hallucinate API unavailability and “describe instead of do.”</p>
+        <p class="detail">Scidekick already ships the model-tier classification library: <strong style="color:var(--ink)">haiku</strong>, <strong style="color:var(--ink)">sonnet</strong>, and <strong style="color:var(--ink)">opus</strong> tiers are inferred from model ID heuristics.</p>
+        <p class="detail">The next wiring step is product enforcement: warn or block only when a scientific workflow is active, without penalizing ordinary coding sessions.</p>
         <div class="code-block">
           <div class="code-header">
             <span class="dot-r"></span><span class="dot-y"></span><span class="dot-g"></span>
           </div>
           <div class="code-body">
-            <span class="ln"><span class="p">◉</span> <span class="c">sk config set minScienceModelTier</span> <span class="a">sonnet</span>  <span class="cm"># default</span></span>
-            <span class="ln"><span class="p">◉</span> <span class="c">sk</span> <span class="a">--no-tier-check</span>                          <span class="cm"># bypass</span></span>
+            <span class="ln"><span class="p">◉</span> <span class="c">haiku</span>       <span class="cm"># unreliable for scientific analysis</span></span>
+            <span class="ln"><span class="p">◉</span> <span class="c">sonnet</span>      <span class="cm"># default minimum target</span></span>
+            <span class="ln"><span class="p">◉</span> <span class="c">opus</span>        <span class="cm"># frontier tier</span></span>
           </div>
         </div>
       </div>
@@ -766,15 +766,15 @@ footer a:hover { color: var(--accent); }
         </div>
         <div class="spec-row">
           <span class="spec-key">Enforcement</span>
-          <span class="spec-val">warn · block</span>
+          <span class="spec-val">library shipped · CLI wiring next</span>
         </div>
         <div class="spec-row">
           <span class="spec-key">Detection</span>
           <span class="spec-val">model ID patterns</span>
         </div>
         <div class="spec-row">
-          <span class="spec-key">Override</span>
-          <span class="spec-val">--no-tier-check</span>
+          <span class="spec-key">Scope</span>
+          <span class="spec-val">scientific contexts only</span>
         </div>
         <div class="spec-row">
           <span class="spec-key">Source</span>
@@ -791,16 +791,17 @@ footer a:hover { color: var(--accent); }
     <div class="section-num">§ 05 — Skill validation gate</div>
     <div class="feat-grid">
       <div class="feat-body">
-        <h2>Trust skills.<br><em>Verify them first.</em></h2>
-        <p class="desc">SkillLens (MSR 2026) found that 25% of skill–target pairs cause negative transfer — the skill actively harms performance. And LLM judges can't tell good skills from bad ones (46.4% accuracy — worse than chance).</p>
-        <p class="detail">Scidekick tracks every installed skill in a SQLite registry. On startup, it checks which skills have been validated against your current model. Unvalidated skills trigger a warning. Validated skills carry metadata: which models they were tested on, the performance delta, and a meta-skill rubric score.</p>
+        <h2>Track skills.<br><em>Gate them next.</em></h2>
+        <p class="desc">SkillLens (MSR 2026) found that 25% of skill–target pairs cause negative transfer — the skill actively harms performance. The safe first step is durable metadata: know what was installed, where it came from, and what it was validated against.</p>
+        <p class="detail">Today Scidekick records installed skills in a SQLite registry with validation metadata fields: tested models, performance delta, and rubric score.</p>
+        <p class="detail">The next product slice wires that registry into scientific workflows so unvalidated skills warn or block before use.</p>
         <div class="code-block">
           <div class="code-header">
             <span class="dot-r"></span><span class="dot-y"></span><span class="dot-g"></span>
           </div>
           <div class="code-body">
-            <span class="ln"><span class="p">◉</span> <span class="c">sk config set skillValidationEnforcement</span> <span class="a">warn</span>   <span class="cm"># default</span></span>
-            <span class="ln"><span class="p">◉</span> <span class="c">sk config set skillValidationEnforcement</span> <span class="a">block</span>  <span class="cm"># hard mode</span></span>
+            <span class="ln"><span class="p">◉</span> <span class="c">skill_metadata</span>     <span class="cm"># SQLite table in agent.db</span></span>
+            <span class="ln"><span class="p">◉</span> <span class="c">validated_models</span>  <span class="cm"># per-model validation history</span></span>
           </div>
         </div>
       </div>
@@ -815,7 +816,7 @@ footer a:hover { color: var(--accent); }
         </div>
         <div class="spec-row">
           <span class="spec-key">Enforcement</span>
-          <span class="spec-val">warn · block · off</span>
+          <span class="spec-val">registry now · warn/block wiring next</span>
         </div>
         <div class="spec-row">
           <span class="spec-key">Rubric</span>
@@ -881,8 +882,8 @@ footer a:hover { color: var(--accent); }
     <div class="section-num">§ 07 — URL schemes</div>
     <div class="feat-grid">
       <div class="feat-body">
-        <h2>Read PRs. Walk skills.<br><em>Query the wiki.</em></h2>
-        <p class="desc">Internal schemes resolve transparently in every FS-shaped tool. <code>read pr://1428</code> returns the same shape as <code>read src/foo.ts</code>. <code>wiki://hypothesis/my-idea</code> opens a wiki entry. One tool surface — the model already knows how to use it.</p>
+        <h2>Read PRs. Walk skills.<br><em>Reuse the same tool surface.</em></h2>
+        <p class="desc">Internal schemes resolve transparently in every FS-shaped tool. <code>read pr://1428</code> returns the same shape as <code>read src/foo.ts</code>. One tool surface — the model already knows how to use it.</p>
       </div>
     </div>
     <div class="scheme-grid">
@@ -891,7 +892,6 @@ footer a:hover { color: var(--accent); }
       <div class="scheme-item"><span class="scheme-prefix">agent://</span><span class="scheme-desc">Subagent output</span></div>
       <div class="scheme-item"><span class="scheme-prefix">skill://</span><span class="scheme-desc">Skill instructions</span></div>
       <div class="scheme-item"><span class="scheme-prefix">rule://</span><span class="scheme-desc">Rule details</span></div>
-      <div class="scheme-item"><span class="scheme-prefix">wiki://</span><span class="scheme-desc">Wiki entries</span></div>
       <div class="scheme-item"><span class="scheme-prefix">artifact://</span><span class="scheme-desc">Full tool output</span></div>
       <div class="scheme-item"><span class="scheme-prefix">memory://</span><span class="scheme-desc">Hindsight memory</span></div>
       <div class="scheme-item"><span class="scheme-prefix">local://</span><span class="scheme-desc">Plans + subagent artifacts</span></div>
@@ -906,14 +906,15 @@ footer a:hover { color: var(--accent); }
     <div class="section-num">§ 08 — Install</div>
     <div class="feat-grid">
       <div class="feat-body">
-        <h2>One command.<br><em>No setup.</em></h2>
-        <p class="desc">Requires Bun ≥ 1.3.14. macOS, Linux, and Windows. Single binary — no dependencies to install first.</p>
+        <h2>Install from release.<br><em>Use Bun only for source.</em></h2>
+        <p class="desc">Default install path uses the latest GitHub release binary. No Bun required. Bun ≥ 1.3.14 is only needed for <code>--source</code> installs.</p>
         <div class="code-block">
           <div class="code-header">
             <span class="dot-r"></span><span class="dot-y"></span><span class="dot-g"></span>
           </div>
           <div class="code-body">
             <span class="ln"><span class="p">◉</span> <span class="c">curl</span> <span class="a">-fsSL https://raw.githubusercontent.com/felippe-alves/scidekick/main/scripts/install.sh</span> <span class="c">| sh</span></span>
+            <span class="ln"><span class="p">◉</span> <span class="c">irm</span> <span class="a">https://raw.githubusercontent.com/felippe-alves/scidekick/main/scripts/install.ps1</span> <span class="c">| iex</span></span>
           </div>
         </div>
       </div>

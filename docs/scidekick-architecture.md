@@ -17,26 +17,22 @@ This document is partly aspirational. The checked roadmap below has been correct
   - `packages/scidekick-guard`
   - `packages/scidekick-skills`
 - `packages/scidekick-guard` provides tested model-tier classification helpers and a SQLite skill registry.
-- `packages/scidekick-science` provides a tested filesystem wiki backend plus schema templates.
-- `site/index.html` exists as a static landing page.
-- The release workflow currently builds and publishes GitHub release binaries; the full `test` job has one inherited Oh My Pi failure in `packages/coding-agent/test/bash-executor.test.ts`.
-- Release workflow configuration now names compiled artifacts `sk-*`.
+- `packages/coding-agent` now wires `sk install-skills` and `sk wiki` into the CLI with focused command tests.
+- The release workflow builds and publishes GitHub release binaries named `sk-*`.
+- The full workspace TypeScript test suite currently passes locally after the Scidekick identity cutover and command wiring.
 
-### Implemented but not wired into the product
+### Implemented but not fully wired into science workflows
 
-- `install-skills` exists as a command class in `packages/scidekick-skills`, but it is not registered with the coding-agent CLI and currently has a missing `getAgentDir` import.
 - The model-tier guard is a library only; it does not warn or block model selection in scientific contexts yet.
 - The skill registry records metadata, but no validation benchmark/gate runs before skills are used.
-- The wiki backend is a library only; there is no `sk wiki` command yet.
 - Violet-teal-amber theme files exist under `.sk/`, but they are not the default active theme.
 - Scientific system-prompt content is not active by default.
 
 ### Planned, not implemented
 
-- Product identity cutover to default `sk` binary/artifact names and `.sk` config without environment variables.
-- `sk install-skills` command wiring and local-fixture tests.
-- `sk wiki` commands for new/list/show/lint.
 - Science-context model-tier warning/block enforcement.
+- Scientific system-prompt activation by default.
+- Theme activation/discoverability as the default Scidekick visual identity.
 - Loop, pipeline, team, extract, and evolve modes.
 
 ---
@@ -308,13 +304,13 @@ The landscape survey revealed a critical gap: skill quality and evolution were a
 - [x] Scientific wiki schema templates (paper/hypothesis/experiment/evidence/insight)
 - [x] Default product identity: `sk` app name, `.sk` config dir, `sk-*` release artifact configuration
 - [x] CLI help and user-facing examples updated from `omp` to `sk`
-- [ ] `sk install-skills` registered and working against local fixture repositories
-- [ ] Skill install registry updates verified end-to-end
-- [ ] `sk wiki new/list/show/lint` command wired to `FilesystemWikiBackend`
+- [x] `sk install-skills` registered and working against local fixture repositories
+- [x] Skill install registry updates verified end-to-end
+- [x] `sk wiki new/list/show/lint` command wired to `FilesystemWikiBackend`
 - [ ] Scidekick scientific system-prompt content active by default or installed without manual copying
 - [ ] Violet-teal-amber theme discoverable and selectable through the existing theme mechanism
 - [ ] Model-tier guard warns/blocks only in scientific contexts
-- [ ] Focused Scidekick CLI tests pass without network access or user-home mutation
+- [x] Focused Scidekick CLI tests pass without network access or user-home mutation
 
 ### Phase 2: Experiment Workflows
 - [ ] Loop mode: `scidekick loop <task>` (tight optimization loop)

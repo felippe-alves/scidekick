@@ -23,6 +23,11 @@ export const commands: CommandEntry[] = [
 	{ name: "grep", load: () => import("./commands/grep").then(m => m.default) },
 	{ name: "grievances", load: () => import("./commands/grievances").then(m => m.default) },
 	{ name: "install", load: () => import("./commands/install").then(m => m.default) },
+	{
+		name: "install-skills",
+		load: () => import("./commands/install-skills").then(m => m.default),
+		aliases: ["skills"],
+	},
 	{ name: "plugin", load: () => import("./commands/plugin").then(m => m.default) },
 	{ name: "setup", load: () => import("./commands/setup").then(m => m.default) },
 	{ name: "shell", load: () => import("./commands/shell").then(m => m.default) },
@@ -31,6 +36,7 @@ export const commands: CommandEntry[] = [
 	{ name: "stats", load: () => import("./commands/stats").then(m => m.default) },
 	{ name: "update", load: () => import("./commands/update").then(m => m.default) },
 	{ name: "tiny-models", load: () => import("./commands/tiny-models").then(m => m.default) },
+	{ name: "wiki", load: () => import("./commands/wiki").then(m => m.default) },
 	{ name: "worktree", load: () => import("./commands/worktree").then(m => m.default), aliases: ["wt"] },
 	{ name: "search", load: () => import("./commands/web-search").then(m => m.default), aliases: ["q"] },
 ];
