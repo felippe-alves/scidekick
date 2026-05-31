@@ -308,7 +308,7 @@ function Install-Binary {
     $ChecksumUrl = "$BinaryUrl.sha256"
     Write-Host "Downloading $BinaryName..."
     $OutPath = Join-Path $InstallDir "sk.exe"
-    $TempBinary = Join-Path $InstallDir ".$BinaryName.$PID.tmp"
+    $TempBinary = Join-Path $InstallDir ".$BinaryName.$PID.tmp.exe"
     $TempChecksum = Join-Path $InstallDir ".$BinaryName.sha256.$PID.tmp"
     try {
         Invoke-WebRequest -Uri $BinaryUrl -OutFile $TempBinary
