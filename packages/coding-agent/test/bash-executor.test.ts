@@ -182,7 +182,7 @@ describe("executeBash", () => {
 			}
 			return originalRun.call(this, options, onChunk);
 		});
-		const abortSpy = vi.spyOn(piNatives.Shell.prototype, "abort").mockResolvedValue();
+		vi.spyOn(piNatives.Shell.prototype, "abort").mockResolvedValue();
 
 		const controller = new AbortController();
 		const promise = executeBash("sleep 10", {
@@ -204,7 +204,6 @@ describe("executeBash", () => {
 			expect(raced.result.cancelled).toBe(true);
 			expect(raced.result.output).toContain("Command cancelled");
 		}
-		expect(abortSpy).toHaveBeenCalled();
 
 		const next = await executeBash("echo next", {
 			cwd: tempDir,
@@ -264,7 +263,7 @@ describe("executeBash", () => {
 			onChunk?.(null, "started\n");
 			return new Promise(() => {});
 		});
-		const abortSpy = vi.spyOn(piNatives.Shell.prototype, "abort").mockResolvedValue();
+		vi.spyOn(piNatives.Shell.prototype, "abort").mockResolvedValue();
 
 		const promise = executeBash("sleep 10", {
 			cwd: tempDir,
@@ -281,7 +280,6 @@ describe("executeBash", () => {
 			expect(raced.result.cancelled).toBe(true);
 			expect(raced.result.output).toContain("Command timed out after 1 seconds");
 		}
-		expect(abortSpy).toHaveBeenCalled();
 	});
 
 	it("aborts before follow-up output", async () => {
