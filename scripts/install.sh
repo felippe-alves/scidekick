@@ -20,6 +20,16 @@ die() {
     exit 1
 }
 
+github_api_get() {
+    url="$1"
+    token="${GITHUB_TOKEN:-${GH_TOKEN:-}}"
+    if [ -n "$token" ]; then
+        curl -fsSL -H "Authorization: Bearer ${token}" -H "Accept: application/vnd.github+json" "$url"
+    else
+        curl -fsSL "$url"
+    fi
+}
+
 has_curl() {
     command -v curl >/dev/null 2>&1
 }
@@ -252,7 +262,7 @@ install_binary() {
     # Get release tag
     if [ -n "$REF" ]; then
         echo "Fetching release $REF..."
-        if RELEASE_JSON=$(curl -fsSL "https://api.github.com/repos/${REPO}/releases/tags/${REF}"); then
+        if RELEASE_JSON=$(github_api_get "https://api.github.com/repos/${REPO}/releases/tags/${REF}"); then
             LATEST=$(echo "$RELEASE_JSON" | grep '"tag_name"' | sed -E 's/.*"([^"]+)".*/\1/')
         else
             echo "Release tag not found: $REF"
@@ -260,7 +270,7 @@ install_binary() {
         fi
     else
         echo "Fetching latest release..."
-        RELEASE_JSON=$(curl -fsSL "https://api.github.com/repos/${REPO}/releases/latest")
+        RELEASE_JSON=$(github_api_get "https://api.github.com/repos/${REPO}/releases/latest")
         LATEST=$(echo "$RELEASE_JSON" | grep '"tag_name"' | sed -E 's/.*"([^"]+)".*/\1/')
     fi
 

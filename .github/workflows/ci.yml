@@ -509,6 +509,8 @@ jobs:
               HOME="$runtime_dir/home" XDG_DATA_HOME="$runtime_dir/xdg" ./sk-darwin-arm64 --version
               HOME="$runtime_dir/home" XDG_DATA_HOME="$runtime_dir/xdg" ./sk-darwin-arm64 --smoke-test
          - name: Verify published installer path
+           env:
+              GITHUB_TOKEN: ${{ github.token }}
            run: |
               runtime_dir="$(mktemp -d)"
               SK_INSTALL_DIR="$runtime_dir/bin" sh scripts/install.sh --binary --ref "${{ needs.gate.outputs.release-tag }}"
