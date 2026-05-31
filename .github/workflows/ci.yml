@@ -327,6 +327,7 @@ jobs:
          'success' && needs.test.result == 'success' && needs.check.result ==
          'success' && needs.check.result == 'success' }}
       needs: [gate, check, native_linux, native_release, rust-hash]
+      strategy:
          fail-fast: false
          matrix:
             include:
