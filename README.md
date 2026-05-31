@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="https://github.com/can1357/oh-my-pi/blob/main/assets/hero.png?raw=true" alt="omp">
+  <img src="assets/hero.svg" alt="scidekick" width="100%">
 </p>
 
 <p align="center">
