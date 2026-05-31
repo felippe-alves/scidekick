@@ -26,8 +26,8 @@ afterEach(() => {
 });
 
 describe("Scidekick identity defaults", () => {
-	it("uses sk as the default application name", () => {
-		expect(APP_NAME).toBe("sk");
+	it("uses scidekick as the default application name", () => {
+		expect(APP_NAME).toBe("scidekick");
 	});
 
 	it("uses .sk as the default config directory", () => {

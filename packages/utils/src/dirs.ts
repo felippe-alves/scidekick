@@ -274,9 +274,9 @@ export function getPluginsPackageJson(home?: string): string {
 	return path.join(getPluginsDir(home), "package.json");
 }
 
-/** Plugin lock file (~/.sk/plugins/sk-plugins.lock.json). */
+/** Plugin lock file (~/.sk/plugins/sk-plugins.lock.json). The display app name is `scidekick`; plugin state follows the `sk` CLI binary. */
 export function getPluginsLockfile(home?: string): string {
-	return path.join(getPluginsDir(home), `${APP_NAME}-plugins.lock.json`);
+	return path.join(getPluginsDir(home), "sk-plugins.lock.json");
 }
 
 /** Get the remote mount directory (~/.omp/remote). */

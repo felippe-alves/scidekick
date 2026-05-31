@@ -49,6 +49,20 @@ function Test-InstalledSk {
     Invoke-Sk --smoke-test
 }
 
+function Set-BrokenInstalledSk {
+    $sk = Join-Path $InstallDir "sk.exe"
+    $content = "@echo off`r`nexit /b 99`r`n"
+    for ($i = 0; $i -lt 20; $i++) {
+        try {
+            Set-Content -Path $sk -Value $content -Encoding ASCII
+            return
+        } catch {
+            Start-Sleep -Milliseconds 250
+        }
+    }
+    Set-Content -Path $sk -Value $content -Encoding ASCII
+}
+
 function Start-FakeReleaseServer {
     param(
         [string]$GoodBinaryPath,
@@ -148,7 +162,7 @@ try {
     Test-InstalledSk
 
     Write-Section "Reinstall over broken local binary"
-    Set-Content -Path (Join-Path $InstallDir "sk.exe") -Value "@echo off`r`nexit /b 99`r`n" -Encoding ASCII
+    Set-BrokenInstalledSk
     Invoke-Installer "v0.0.0-test"
     Test-InstalledSk
 
