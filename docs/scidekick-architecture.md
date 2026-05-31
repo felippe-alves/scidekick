@@ -23,15 +23,12 @@ This document is partly aspirational. The checked roadmap below has been correct
 
 ### Implemented but not fully wired into science workflows
 
-- The model-tier guard is a library only; it does not warn or block model selection in scientific contexts yet.
 - The skill registry records metadata, but no validation benchmark/gate runs before skills are used.
 - Violet-teal-amber theme files exist under `.sk/`, but they are not the default active theme.
-- Scientific system-prompt content is not active by default.
 
 ### Planned, not implemented
 
-- Science-context model-tier warning/block enforcement.
-- Scientific system-prompt activation by default.
+- Theme activation/discoverability as the default Scidekick visual identity.
 - Theme activation/discoverability as the default Scidekick visual identity.
 - Loop, pipeline, team, extract, and evolve modes.
 
@@ -307,9 +304,9 @@ The landscape survey revealed a critical gap: skill quality and evolution were a
 - [x] `sk install-skills` registered and working against local fixture repositories
 - [x] Skill install registry updates verified end-to-end
 - [x] `sk wiki new/list/show/lint` command wired to `FilesystemWikiBackend`
-- [ ] Scidekick scientific system-prompt content active by default or installed without manual copying
+- [x] Scidekick scientific system-prompt content active by default
 - [ ] Violet-teal-amber theme discoverable and selectable through the existing theme mechanism
-- [ ] Model-tier guard warns/blocks only in scientific contexts
+- [x] Model-tier guard warns/blocks in scientific contexts
 - [x] Focused Scidekick CLI tests pass without network access or user-home mutation
 
 ### Phase 2: Experiment Workflows
