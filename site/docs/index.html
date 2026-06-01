@@ -1,0 +1,609 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="color-scheme" content="light">
+<meta name="theme-color" content="#ffffff">
+<title>Scidekick User Guide</title>
+<meta name="description" content="User documentation for Scidekick: install, models, coding tools, research wiki, journal, skills, and a simple Iris ML research tutorial.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230b0a14'/%3E%3Ctext x='32' y='44' text-anchor='middle' font-size='36' fill='%237b8f45'%3E%E2%97%89%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; }
+:root {
+	--bg: #ffffff;
+	--paper: #ffffff;
+	--ink: #111111;
+	--muted: #626262;
+	--line: #d4d4cc;
+	--soft: #f5f5f3;
+	--accent: #7b8f45;
+	--accent-dim: #5c6e30;
+	--font-sans: 'Space Grotesk', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+	--font-mono: 'IBM Plex Mono', Menlo, Consolas, monospace;
+}
+html { background: var(--bg); color: var(--ink); font-family: var(--font-sans); line-height: 1.6; -webkit-font-smoothing: antialiased; scroll-behavior: smooth; }
+body { margin: 0; min-height: 100vh; }
+a { color: var(--accent); text-decoration: none; }
+a:hover { color: var(--ink); }
+nav { position: sticky; top: 0; z-index: 10; background: rgba(255,255,255,0.92); backdrop-filter: blur(12px) saturate(180%); border-bottom: 1px solid var(--line); }
+.nav-inner { max-width: 1160px; margin: 0 auto; padding: 14px 24px; display: flex; align-items: center; justify-content: space-between; gap: 24px; }
+.nav-brand { display: inline-flex; align-items: center; gap: 8px; font-weight: 700; color: var(--ink); }
+.glyph { color: var(--accent); }
+.nav-links { display: flex; gap: 20px; align-items: center; font-family: var(--font-mono); font-size: 11px; text-transform: uppercase; letter-spacing: 0.16em; }
+.nav-links a { color: var(--muted); }
+.nav-links a:hover { color: var(--ink); }
+.hero { border-bottom: 1px solid var(--line); background-image: linear-gradient(rgba(212,212,204,0.5) 1px, transparent 1px), linear-gradient(90deg, rgba(212,212,204,0.5) 1px, transparent 1px); background-size: 48px 48px; }
+.hero-inner { max-width: 1160px; margin: 0 auto; padding: 72px 24px 56px; background: radial-gradient(ellipse 80% 70% at 50% 0%, rgba(255,255,255,0.92) 0%, rgba(255,255,255,0.82) 58%, transparent 100%); }
+.eyebrow { display: inline-flex; align-items: center; gap: 8px; border: 1px solid var(--line); border-radius: 999px; padding: 6px 12px; font-family: var(--font-mono); font-size: 11px; text-transform: uppercase; letter-spacing: 0.16em; color: var(--muted); margin-bottom: 22px; background: #fff; }
+h1 { margin: 0 0 18px; font-size: clamp(2.5rem, 1.4rem + 4vw, 5.5rem); line-height: 0.96; letter-spacing: -0.045em; text-transform: uppercase; max-width: 10ch; }
+.hero p { max-width: 56ch; color: var(--muted); font-size: 1.08rem; margin: 0; }
+.layout { max-width: 1160px; margin: 0 auto; padding: 42px 24px 80px; display: grid; grid-template-columns: minmax(0, 1fr); gap: 36px; }
+@media (min-width: 980px) { .layout { grid-template-columns: 260px minmax(0, 1fr); align-items: start; } }
+.toc { position: sticky; top: 74px; border: 1px solid var(--line); background: var(--soft); padding: 18px; font-family: var(--font-mono); font-size: 12px; }
+.toc-title { text-transform: uppercase; letter-spacing: 0.18em; color: var(--muted); font-size: 10px; margin-bottom: 10px; }
+.toc a { display: block; color: var(--muted); padding: 5px 0; }
+.toc a:hover { color: var(--ink); }
+article { min-width: 0; }
+article > *:first-child { margin-top: 0; }
+article h1 { display: none; }
+article h2 { margin: 44px 0 14px; padding-top: 10px; border-top: 1px solid var(--line); font-size: clamp(1.6rem, 1.1rem + 1.5vw, 2.6rem); line-height: 1.05; letter-spacing: -0.03em; }
+article h3 { margin: 30px 0 10px; font-size: 1.15rem; letter-spacing: -0.01em; }
+article p, article li { color: var(--muted); }
+article strong { color: var(--ink); }
+article blockquote { margin: 24px 0; padding: 16px 18px; border-left: 4px solid var(--accent); background: var(--soft); }
+article ul, article ol { padding-left: 1.4rem; }
+article li + li { margin-top: 4px; }
+article code { font-family: var(--font-mono); font-size: 0.9em; background: var(--soft); border: 1px solid var(--line); border-radius: 4px; padding: 0.08em 0.28em; color: var(--ink); }
+article pre { overflow-x: auto; background: #111111; color: #f5f5f3; border-radius: 10px; padding: 18px; border: 1px solid #222; line-height: 1.55; }
+article pre code { background: transparent; border: 0; color: inherit; padding: 0; }
+article table { width: 100%; border-collapse: collapse; margin: 22px 0; font-size: 0.95rem; }
+article th, article td { border: 1px solid var(--line); padding: 9px 11px; vertical-align: top; }
+article th { background: var(--soft); color: var(--ink); text-align: left; }
+footer { border-top: 1px solid var(--line); padding: 28px 24px; color: var(--muted); font-family: var(--font-mono); font-size: 12px; }
+.footer-inner { max-width: 1160px; margin: 0 auto; display: flex; justify-content: space-between; gap: 20px; flex-wrap: wrap; }
+</style>
+</head>
+<body>
+<nav>
+	<div class="nav-inner">
+		<a href="../" class="nav-brand"><span class="glyph">◉</span> Scidekick</a>
+		<div class="nav-links">
+			<a href="../#wiki">Wiki</a>
+			<a href="../#skills">Skills</a>
+			<a href="../#platform">Platform</a>
+			<a href="https://github.com/felippe-alves/scidekick">GitHub ↗</a>
+		</div>
+	</div>
+</nav>
+<header class="hero">
+	<div class="hero-inner">
+		<div class="eyebrow"><span class="glyph">◉</span> User documentation</div>
+		<h1>Use Scidekick</h1>
+		<p>Install it, configure models, use the inherited Pi and Oh My Pi coding-agent features, and run a small Iris dataset research workflow with the Scidekick wiki and journal.</p>
+	</div>
+</header>
+<main class="layout">
+	<aside class="toc">
+		<div class="toc-title">Guide</div>
+		<a href="#1-mental-model">Mental model</a>
+		<a href="#2-install-and-start">Install</a>
+		<a href="#4-everyday-coding-features">Coding features</a>
+		<a href="#5-research-features-available-today">Research features</a>
+		<a href="#7-tutorial-simple-ml-research-on-the-iris-dataset">Iris tutorial</a>
+		<a href="#10-where-to-go-next">Next steps</a>
+	</aside>
+	<article>
+<h1 id="scidekick-user-guide">Scidekick User Guide</h1>
+<p>Scidekick is a terminal-first AI coding and research assistant. It is the Scidekick build of Oh My Pi, which itself began as a fork of Mario Zechner&#39;s Pi. That lineage matters: Scidekick includes the mature coding-agent features from Pi and Oh My Pi, then adds a scientific research layer for AI/ML work.</p>
+<p>This guide is written for users. It explains what Scidekick can do today, how to use it, and how to run a small research workflow with the Iris dataset using the current wiki, journal, tools, and Python execution features.</p>
+<blockquote>
+<p>Current status: the coding agent is production-ready. The research wiki, research journal, scientific skill installation, scientific prompts/themes, and model-tier warnings are wired into the CLI. Higher-level research commands such as <code>sk experiment</code>, <code>sk run</code>, <code>sk loop</code>, <code>sk pipeline</code>, and <code>sk team</code> are planned but not yet product features. Until those land, use the wiki, journal, normal files, Python execution, and the agent&#39;s existing tools to carry research workflows.</p>
+</blockquote>
+<h2 id="1-mental-model">1. Mental model</h2>
+<p>Think of Scidekick as four layers:</p>
+<ol>
+<li><strong>Pi foundation</strong> — an interactive terminal agent with sessions, tools, file editing, shell execution, and a TypeScript SDK.</li>
+<li><strong>Oh My Pi coding harness</strong> — more providers, stronger tools, LSP, debugger control, subagents, browser automation, web search, memory, extensions, MCP, and native Rust acceleration.</li>
+<li><strong>Scidekick identity</strong> — <code>sk</code>/<code>scidekick</code>, <code>.sk</code> config/workspace directories, Scidekick theme, scientific prompt additions, and scientific command surfaces.</li>
+<li><strong>Research layer</strong> — project wiki, research journal, scientific skills, model-tier guard, and a roadmap toward experiments, runs, evaluations, traces, rollouts, and reproducible research objects.</li>
+</ol>
+<p>Use Scidekick when you want the agent to operate in the same workspace you do: reading files, editing code, running commands, using a language server, debugging processes, searching the web, keeping notes, and leaving durable research artifacts behind.</p>
+<h2 id="2-install-and-start">2. Install and start</h2>
+<h3 id="install">Install</h3>
+<p>macOS and Linux:</p>
+<pre><code class="language-sh">curl -fsSL https://omp.sh/install | sh
+</code></pre>
+<p>With Bun:</p>
+<pre><code class="language-sh">bun install -g @oh-my-pi/pi-coding-agent
+</code></pre>
+<p>Windows PowerShell:</p>
+<pre><code class="language-powershell">irm https://omp.sh/install.ps1 | iex
+</code></pre>
+<p>Depending on how you installed the current Scidekick build, the binary may be exposed as <code>sk</code> or <code>scidekick</code>. The examples below use <code>sk</code>; if your install exposes <code>scidekick</code>, substitute that name.</p>
+<p>Check the install:</p>
+<pre><code class="language-sh">sk --version
+sk doctor
+</code></pre>
+<h3 id="configure-a-model">Configure a model</h3>
+<p>Scidekick supports many providers. The simplest setup is to export one provider key:</p>
+<pre><code class="language-sh">export ANTHROPIC_API_KEY=...
+# or
+export OPENAI_API_KEY=...
+# or
+export GEMINI_API_KEY=...
+</code></pre>
+<p>Then start:</p>
+<pre><code class="language-sh">sk
+</code></pre>
+<p>You can also choose a model for a single session:</p>
+<pre><code class="language-sh">sk --model opus
+sk --model gpt-5.2
+sk --model openai/gpt-5.2
+</code></pre>
+<p>Scidekick uses role-based model routing:</p>
+<ul>
+<li><code>default</code> — normal work</li>
+<li><code>smol</code> — cheap/lightweight work, including some subagent fan-out</li>
+<li><code>slow</code> — deeper reasoning</li>
+<li><code>plan</code> — planning/architecture work</li>
+<li><code>commit</code> — commit messages and changelog work</li>
+</ul>
+<p>Override roles at launch:</p>
+<pre><code class="language-sh">sk --smol haiku --slow opus --plan gemini-pro
+</code></pre>
+<p>Or cycle configured models inside the TUI with <code>Ctrl+P</code>.</p>
+<h2 id="3-main-ways-to-use-scidekick">3. Main ways to use Scidekick</h2>
+<h3 id="interactive-mode">Interactive mode</h3>
+<pre><code class="language-sh">sk
+</code></pre>
+<p>Use this for normal work. The TUI renders tool calls, file reads, diffs, shell commands, browser actions, subagents, todos, and ask/approval cards.</p>
+<p>Start with an initial prompt:</p>
+<pre><code class="language-sh">sk &quot;Explain this repository and identify the main entry points&quot;
+</code></pre>
+<p>Include files in the prompt with <code>@</code>:</p>
+<pre><code class="language-sh">sk @README.md @docs/scidekick-architecture.md &quot;Summarize the current implementation status&quot;
+</code></pre>
+<h3 id="one-shot-mode">One-shot mode</h3>
+<pre><code class="language-sh">sk -p &quot;List the packages and explain their purpose&quot;
+</code></pre>
+<p>Use one-shot mode for automation, scripts, or quick questions. It processes the prompt and exits.</p>
+<h3 id="resume-or-continue-a-session">Resume or continue a session</h3>
+<pre><code class="language-sh">sk --continue &quot;What did we decide last time?&quot;
+sk --resume
+sk --resume &lt;session-id-prefix&gt;
+</code></pre>
+<p>Sessions are stored under the Scidekick agent directory, normally <code>~/.sk/agent</code>.</p>
+<h3 id="export-a-session">Export a session</h3>
+<pre><code class="language-sh">sk --export ~/.sk/agent/sessions/&lt;path&gt;/session.jsonl
+</code></pre>
+<p>This converts a saved session to shareable HTML.</p>
+<h3 id="editor-integration-through-acp">Editor integration through ACP</h3>
+<pre><code class="language-sh">sk acp
+</code></pre>
+<p>ACP is the Agent Client Protocol used by editors such as Zed. In ACP mode, editor file writes, terminal output, and permission prompts route through the editor instead of only the terminal UI.</p>
+<h3 id="rpc-mode">RPC mode</h3>
+<pre><code class="language-sh">sk --mode rpc --no-session
+</code></pre>
+<p>RPC mode exposes the agent over stdio using NDJSON frames. Use it when embedding Scidekick from a non-Node host or when you want process isolation.</p>
+<h2 id="4-everyday-coding-features">4. Everyday coding features</h2>
+<h3 id="read-search-and-inspect-code">Read, search, and inspect code</h3>
+<p>Scidekick has first-class file tools. It does not need to shell out to <code>cat</code>, <code>grep</code>, or <code>find</code>.</p>
+<p>Ask naturally:</p>
+<pre><code class="language-text">Find where model routing is configured and explain the fallback behavior.
+</code></pre>
+<p>Under the hood, the agent can use:</p>
+<ul>
+<li><code>read</code> — reads files, directories, archives, SQLite databases, PDFs, notebooks, images, and URLs through one path-shaped interface.</li>
+<li><code>find</code> — finds files by glob.</li>
+<li><code>search</code> — searches file content with regex.</li>
+<li><code>ast_grep</code> — syntax-aware structural search.</li>
+<li><code>lsp</code> — definitions, references, diagnostics, code actions, renames, and type info.</li>
+</ul>
+<p>The <code>read</code> tool summarizes large source files structurally: declarations stay visible and large bodies are elided until the agent asks for the specific range it needs. This keeps context focused.</p>
+<h3 id="edit-safely">Edit safely</h3>
+<p>Scidekick has several editing paths:</p>
+<ul>
+<li><code>edit</code> — hashline patches anchored to a content snapshot. Stale anchors are rejected before corrupting files.</li>
+<li><code>write</code> — create or replace a file.</li>
+<li><code>ast_edit</code> — structural rewrites through ast-grep, previewed before application.</li>
+<li><code>lsp rename</code> / <code>lsp code_actions</code> — symbol-aware edits when a language server is available.</li>
+</ul>
+<p>Good prompts:</p>
+<pre><code class="language-text">Rename the exported function parseModelId to parseConcreteModelId using LSP and update all callers.
+</code></pre>
+<pre><code class="language-text">Replace console.log calls in src/ with logger.debug, but use ast_edit so string contents are preserved.
+</code></pre>
+<pre><code class="language-text">Fix the failing test in packages/coding-agent/src/scidekick without changing public behavior.
+</code></pre>
+<h3 id="use-the-shell-without-losing-context">Use the shell without losing context</h3>
+<p>Scidekick can run commands and keep track of their outputs:</p>
+<pre><code class="language-text">Run the focused tests for the wiki command and fix any failures.
+</code></pre>
+<p>The bash tool supports persistent sessions, PTY mode when needed, background jobs, and aborts. Scidekick&#39;s native shell stack is backed by Rust and a vendored brush shell, so it works consistently across platforms.</p>
+<h3 id="use-language-servers">Use language servers</h3>
+<p>When a language server is available, Scidekick can use your IDE&#39;s knowledge:</p>
+<pre><code class="language-text">Find all references to FilesystemWikiBackend and explain which commands depend on it.
+</code></pre>
+<pre><code class="language-text">Move this file and update imports with LSP rename_file.
+</code></pre>
+<p>This is safer than text search for exported symbol changes, renames, and code actions.</p>
+<h3 id="debug-real-programs">Debug real programs</h3>
+<p>The <code>debug</code> tool drives Debug Adapter Protocol sessions. Scidekick can launch or attach debuggers, set breakpoints, step code, inspect variables, and pause hung programs.</p>
+<p>Typical uses:</p>
+<pre><code class="language-text">Attach to the Python process that is hanging, pause it, and inspect the stack.
+</code></pre>
+<pre><code class="language-text">Run this C binary under lldb and find where it segfaults.
+</code></pre>
+<p>Supported adapters depend on local binaries, commonly <code>lldb-dap</code>, <code>gdb</code>, <code>debugpy</code>, and <code>dlv</code>.</p>
+<h3 id="run-python-and-javascript-cells">Run Python and JavaScript cells</h3>
+<p>The <code>eval</code> tool provides persistent Python and JavaScript kernels. Use it for analysis, plots, quick parsers, data inspection, and experiments.</p>
+<p>Inside cells, the agent can call helpers such as <code>read</code>, <code>write</code>, <code>tree</code>, <code>diff</code>, <code>llm</code>, and <code>agent</code>. State persists across cells in a session.</p>
+<p>Good prompts:</p>
+<pre><code class="language-text">Use Python eval to load data/metrics.csv, summarize it with pandas, and write a plot to reports/metrics.png.
+</code></pre>
+<pre><code class="language-text">Use JavaScript eval to parse package.json and list workspace packages by dependency count.
+</code></pre>
+<h3 id="browse-the-web-and-web-apps">Browse the web and web apps</h3>
+<p>Scidekick includes two distinct web capabilities:</p>
+<ul>
+<li><code>web_search</code> — search the web, including technical and research sources, then cite sources.</li>
+<li><code>browser</code> — drive a real Chromium tab or attach to an Electron/Chrome app through CDP.</li>
+</ul>
+<p>Examples:</p>
+<pre><code class="language-text">Search for the current OpenTelemetry GenAI semantic conventions and summarize what trace spans Scidekick should export.
+</code></pre>
+<pre><code class="language-text">Open the local dashboard in a browser, inspect the page, and verify the settings form works.
+</code></pre>
+<p>For static web content, the agent should normally use <code>read</code> on a URL or <code>web_search</code>. Use <code>browser</code> when JavaScript execution or interaction is required.</p>
+<h3 id="delegate-with-subagents">Delegate with subagents</h3>
+<p>The <code>task</code> tool fans work out to subagents. Use it for independent investigation, code review, decomposable refactors, and parallel context gathering.</p>
+<p>Good prompts:</p>
+<pre><code class="language-text">Have subagents inspect the eval, task, and mcp subsystems in parallel. Return a concise map of the entry points and risks.
+</code></pre>
+<pre><code class="language-text">Split this migration by package and have each subagent update one package. I will run the final tests once they finish.
+</code></pre>
+<p>Subagents can coordinate through IRC, return structured outputs, and run in isolated worktrees when configured.</p>
+<h3 id="review-changes">Review changes</h3>
+<p>The <code>/review</code> workflow runs dedicated reviewer agents over branches, commits, or uncommitted changes. It reports issues by priority and confidence, so you can fix release blockers first.</p>
+<p>Typical prompt:</p>
+<pre><code class="language-text">/review the uncommitted changes for correctness, security, and missing tests.
+</code></pre>
+<h3 id="use-memory">Use memory</h3>
+<p>Scidekick has memory features inherited from Oh My Pi:</p>
+<ul>
+<li><code>retain</code> — queue facts into a durable Hindsight bank.</li>
+<li><code>recall</code> — retrieve raw memories.</li>
+<li><code>reflect</code> — synthesize an answer over stored memories.</li>
+</ul>
+<p>Memory backends are configured through <code>memory.backend</code>:</p>
+<ul>
+<li><code>off</code> — no memory.</li>
+<li><code>local</code> — local rollout summaries and artifacts.</li>
+<li><code>hindsight</code> — Hindsight server-backed memory.</li>
+</ul>
+<p>Use memory for stable project facts, recurring conventions, and decisions that should survive session compaction.</p>
+<h2 id="5-research-features-available-today">5. Research features available today</h2>
+<h3 id="project-wiki">Project wiki</h3>
+<p>Initialize a wiki in a project:</p>
+<pre><code class="language-sh">sk wiki init
+</code></pre>
+<p>Create pages:</p>
+<pre><code class="language-sh">sk wiki new paper &quot;Terminal-Bench 2.0&quot;
+sk wiki new hypothesis &quot;Linear models are enough for Iris&quot;
+sk wiki new experiment &quot;Iris baseline classification&quot;
+sk wiki page baseline-eval
+</code></pre>
+<p>List, show, query, and lint pages:</p>
+<pre><code class="language-sh">sk wiki list
+sk wiki show iris-baseline-classification
+sk wiki query benchmark
+sk wiki lint iris-baseline-classification
+</code></pre>
+<p>Ingest an existing Markdown file:</p>
+<pre><code class="language-sh">sk wiki ingest notes.md &quot;Baseline notes&quot;
+</code></pre>
+<p>The current wiki backend is filesystem-first: Markdown files with YAML frontmatter under <code>.sk/wiki/</code>. This makes it easy to commit, diff, edit by hand, and review.</p>
+<h3 id="research-journal">Research journal</h3>
+<p>Initialize the journal:</p>
+<pre><code class="language-sh">sk journal init
+</code></pre>
+<p>Add dated entries:</p>
+<pre><code class="language-sh">sk journal add &quot;Started Iris baseline. Goal: compare a linear classifier and a tree model.&quot;
+sk journal today
+</code></pre>
+<p>Link entries to research objects:</p>
+<pre><code class="language-sh">sk journal link 2026-05-31-140455 wiki:iris-baseline-classification
+</code></pre>
+<p>Use the journal for chronological memory: what you tried, why it mattered, what failed, what surprised you, and what you decided.</p>
+<h3 id="scientific-skills">Scientific skills</h3>
+<p>List or install skills from a repository:</p>
+<pre><code class="language-sh">sk install-skills --list --from felippe-alves/scientific-agent-skills
+sk install-skills --from felippe-alves/scientific-agent-skills --skill literature-review
+sk install-skills --project --from ./skills-repo
+</code></pre>
+<p>Skills are natural-language procedures the agent can load into context for a domain. Scidekick&#39;s long-term design follows SkillLens and SkillOpt: skills need validation metadata, model compatibility, and evolution through rollout → reflect → edit → gate loops. Today, install skills deliberately and treat unvalidated skills as advice, not proof.</p>
+<h3 id="model-tier-guard">Model-tier guard</h3>
+<p>Scidekick warns in scientific contexts when a weak model tier is likely to be unsafe for scientific reasoning. This is based on the AutoScientists finding that Haiku-class models can fail catastrophically at analyst work. Use stronger models for tasks that require experimental design, statistical interpretation, literature synthesis, or claims about evidence.</p>
+<h3 id="research-surface-roadmap">Research surface roadmap</h3>
+<p>Planned commands include:</p>
+<pre><code class="language-sh">sk experiment init
+sk run record
+sk eval record
+sk dataset snapshot
+sk model card
+sk trace ingest
+sk rollout record
+sk taskset init
+sk grader run
+sk judge calibrate
+</code></pre>
+<p>Until those commands exist, the recommended pattern is:</p>
+<ol>
+<li>Keep source code and notebooks in normal project files.</li>
+<li>Use <code>eval</code>/<code>bash</code> to run analysis.</li>
+<li>Write artifacts under a clear directory such as <code>reports/&lt;experiment&gt;/</code>.</li>
+<li>Record decisions with <code>sk journal</code>.</li>
+<li>Create durable pages with <code>sk wiki</code>.</li>
+<li>Commit the project state when a result matters.</li>
+</ol>
+<h2 id="6-extensibility">6. Extensibility</h2>
+<h3 id="plugins-and-extensions">Plugins and extensions</h3>
+<p>Extensions are TypeScript modules that can register tools, slash commands, and event handlers.</p>
+<p>Install or link packages:</p>
+<pre><code class="language-sh">sk plugin install &lt;package-or-repo&gt;
+sk install &lt;package-or-repo&gt;
+</code></pre>
+<p>Load a local extension for one session:</p>
+<pre><code class="language-sh">sk --extension ./my-extension.ts
+</code></pre>
+<p>Extensions can add LLM-callable tools, slash commands, event hooks, custom UI, and packaged capability directories.</p>
+<h3 id="mcp-servers">MCP servers</h3>
+<p>Scidekick supports Model Context Protocol servers. MCP lets external processes expose resources, prompts, and tools over JSON-RPC. Use MCP for scientific databases, lab systems, custom evaluators, private APIs, and other tools that should remain outside the core binary.</p>
+<p>Typical use cases:</p>
+<ul>
+<li>expose a lab inventory or ELN API as tools;</li>
+<li>expose a paper search server;</li>
+<li>connect a local knowledge base;</li>
+<li>make a private benchmark runner available to the agent.</li>
+</ul>
+<h3 id="custom-providers-and-local-models">Custom providers and local models</h3>
+<p>Custom providers go in <code>models.yml</code>. Scidekick supports OpenAI-compatible servers, Ollama, LM Studio, llama.cpp, vLLM, LiteLLM, and many hosted providers.</p>
+<p>Examples of local-model setups:</p>
+<pre><code class="language-yaml">providers:
+  local-ollama:
+    api: openai-completions
+    baseUrl: http://localhost:11434/v1
+    auth: none
+    discovery:
+      type: ollama
+</code></pre>
+<p>Use local models for low-risk summarization, title generation, or cheap background work. Use stronger models for scientific reasoning and high-impact edits.</p>
+<h2 id="7-tutorial-simple-ml-research-on-the-iris-dataset">7. Tutorial: simple ML research on the Iris dataset</h2>
+<p>This tutorial uses Scidekick as a lightweight research harness for a classic question:</p>
+<blockquote>
+<p>Can a simple model classify Iris species well enough, and what does the result tell us about the dataset?</p>
+</blockquote>
+<p>You will use the current Scidekick features:</p>
+<ul>
+<li>wiki pages for research objects;</li>
+<li>journal entries for chronological decisions;</li>
+<li>Python execution for analysis;</li>
+<li>file writing for artifacts;</li>
+<li>agent review for interpretation;</li>
+<li>optional web/literature lookup;</li>
+<li>a final wiki summary.</li>
+</ul>
+<p>The tutorial does not require future <code>sk experiment</code> or <code>sk run</code> commands.</p>
+<h3 id="step-0-create-or-enter-a-project">Step 0 — Create or enter a project</h3>
+<pre><code class="language-sh">mkdir iris-scidekick-demo
+cd iris-scidekick-demo
+sk
+</code></pre>
+<p>Inside the session, tell Scidekick:</p>
+<pre><code class="language-text">We are doing a small ML research workflow on the Iris dataset. Keep a concise research trail in .sk/wiki and .sk/journal. Use Python eval for analysis and write reusable artifacts under reports/iris-baseline/.
+</code></pre>
+<h3 id="step-1-initialize-research-memory">Step 1 — Initialize research memory</h3>
+<p>In a shell, or by asking Scidekick to do it:</p>
+<pre><code class="language-sh">sk wiki init
+sk journal init
+sk wiki new hypothesis &quot;Iris linear separability baseline&quot;
+sk wiki new experiment &quot;Iris baseline classification&quot;
+sk journal add &quot;Started Iris baseline classification. Goal: compare simple classifiers and record whether a linear model is sufficient.&quot;
+</code></pre>
+<p>The hypothesis page should capture the idea:</p>
+<pre><code class="language-text">Hypothesis: Because Iris setosa is linearly separable and versicolor/virginica are close but structured, a simple standardized logistic regression should reach high cross-validation accuracy. A tree-based model may improve slightly but should not be necessary for a strong baseline.
+</code></pre>
+<p>Ask Scidekick:</p>
+<pre><code class="language-text">Open the Iris hypothesis and experiment wiki pages, fill them with the hypothesis, planned metrics, expected artifacts, and links to today&#39;s journal entry.
+</code></pre>
+<h3 id="step-2-ask-scidekick-to-plan-the-analysis">Step 2 — Ask Scidekick to plan the analysis</h3>
+<p>Prompt:</p>
+<pre><code class="language-text">Plan a small but rigorous Iris dataset analysis. Keep it simple: load sklearn&#39;s Iris dataset, inspect class balance and feature distributions, compare LogisticRegression and RandomForestClassifier with stratified 5-fold cross-validation, hold out a test split, compute accuracy and macro-F1, write a confusion matrix plot, and summarize limitations. Do not overclaim.
+</code></pre>
+<p>A good plan should include:</p>
+<ul>
+<li>dataset source (<code>sklearn.datasets.load_iris</code>);</li>
+<li>target labels and feature names;</li>
+<li>class balance check;</li>
+<li>stratified train/test split;</li>
+<li>baseline model;</li>
+<li>comparison model;</li>
+<li>cross-validation;</li>
+<li>held-out metrics;</li>
+<li>plots and JSON/Markdown artifacts;</li>
+<li>limitations: tiny clean dataset, no deployment claim, no leakage beyond bundled toy data.</li>
+</ul>
+<h3 id="step-3-run-the-analysis-in-python-eval">Step 3 — Run the analysis in Python eval</h3>
+<p>Ask Scidekick:</p>
+<pre><code class="language-text">Use Python eval to run the Iris analysis. Save artifacts under reports/iris-baseline/: metrics.json, summary.md, confusion-matrix.png, and feature-pairplot.png if seaborn is available. Use deterministic seeds. Show the key metrics in the conversation.
+</code></pre>
+<p>A representative Python analysis looks like this:</p>
+<pre><code class="language-python">from pathlib import Path
+import json
+
+import numpy as np
+import pandas as pd
+from sklearn.datasets import load_iris
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import accuracy_score, classification_report, confusion_matrix, f1_score
+from sklearn.model_selection import StratifiedKFold, cross_validate, train_test_split
+from sklearn.pipeline import make_pipeline
+from sklearn.preprocessing import StandardScaler
+
+out = Path(&quot;reports/iris-baseline&quot;)
+out.mkdir(parents=True, exist_ok=True)
+
+iris = load_iris(as_frame=True)
+X = iris.data
+y = iris.target
+labels = list(iris.target_names)
+
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.2, random_state=42, stratify=y
+)
+
+models = {
+    &quot;logistic_regression&quot;: make_pipeline(
+        StandardScaler(),
+        LogisticRegression(max_iter=1000, random_state=42),
+    ),
+    &quot;random_forest&quot;: RandomForestClassifier(
+        n_estimators=200,
+        random_state=42,
+    ),
+}
+
+cv = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
+results = {}
+
+for name, model in models.items():
+    cv_scores = cross_validate(
+        model,
+        X_train,
+        y_train,
+        cv=cv,
+        scoring=[&quot;accuracy&quot;, &quot;f1_macro&quot;],
+    )
+    model.fit(X_train, y_train)
+    pred = model.predict(X_test)
+    results[name] = {
+        &quot;cv_accuracy_mean&quot;: float(cv_scores[&quot;test_accuracy&quot;].mean()),
+        &quot;cv_accuracy_std&quot;: float(cv_scores[&quot;test_accuracy&quot;].std()),
+        &quot;cv_f1_macro_mean&quot;: float(cv_scores[&quot;test_f1_macro&quot;].mean()),
+        &quot;cv_f1_macro_std&quot;: float(cv_scores[&quot;test_f1_macro&quot;].std()),
+        &quot;test_accuracy&quot;: float(accuracy_score(y_test, pred)),
+        &quot;test_f1_macro&quot;: float(f1_score(y_test, pred, average=&quot;macro&quot;)),
+        &quot;confusion_matrix&quot;: confusion_matrix(y_test, pred).tolist(),
+        &quot;classification_report&quot;: classification_report(
+            y_test,
+            pred,
+            target_names=labels,
+            output_dict=True,
+        ),
+    }
+
+metrics = {
+    &quot;dataset&quot;: {
+        &quot;name&quot;: &quot;sklearn Iris&quot;,
+        &quot;n_rows&quot;: int(len(X)),
+        &quot;n_features&quot;: int(X.shape[1]),
+        &quot;target_names&quot;: labels,
+        &quot;class_counts&quot;: pd.Series(y).value_counts().sort_index().to_dict(),
+    },
+    &quot;models&quot;: results,
+}
+
+(out / &quot;metrics.json&quot;).write_text(json.dumps(metrics, indent=2))
+</code></pre>
+<p>Scidekick can write and run the script for you instead of keeping it only in a cell:</p>
+<pre><code class="language-text">Turn the Python analysis into experiments/iris_baseline.py, run it, and compare the script output to the eval-cell result.
+</code></pre>
+<h3 id="step-4-generate-plots">Step 4 — Generate plots</h3>
+<p>Ask:</p>
+<pre><code class="language-text">Create a confusion matrix plot for the better model and a feature scatter/pair plot. Save them under reports/iris-baseline/ and mention any package that is unavailable instead of faking a plot.
+</code></pre>
+<p>If a plotting dependency is missing, Scidekick should either install it with your approval or fall back to a simpler matplotlib plot.</p>
+<h3 id="step-5-interpret-the-result-carefully">Step 5 — Interpret the result carefully</h3>
+<p>Prompt:</p>
+<pre><code class="language-text">Read reports/iris-baseline/metrics.json and summary.md. Interpret whether the hypothesis was supported. Be precise about the limits of the evidence: small dataset, simple train/test split, cross-validation variance, no external validation. Update the experiment wiki page with the result, artifacts, and limitations.
+</code></pre>
+<p>A good conclusion might be:</p>
+<pre><code class="language-text">The hypothesis is supported for this toy dataset: standardized logistic regression reaches high cross-validation and held-out accuracy, so a linear baseline is sufficient for a strong result. Random forest may match or slightly exceed it, but the difference is not meaningful without repeated evaluation. This does not support claims about real-world botanical classification because the dataset is tiny, curated, and bundled.
+</code></pre>
+<h3 id="step-6-record-the-decision">Step 6 — Record the decision</h3>
+<pre><code class="language-sh">sk journal add &quot;Iris baseline complete. Logistic regression was sufficient for high accuracy; random forest did not justify added complexity. See wiki:iris-baseline-classification and reports/iris-baseline/.&quot;
+sk wiki query iris
+</code></pre>
+<p>Ask Scidekick:</p>
+<pre><code class="language-text">Update the Iris experiment wiki page with: hypothesis, dataset, methods, metrics, artifacts, conclusion, limitations, and next questions. Then show me the page.
+</code></pre>
+<h3 id="step-7-optional-use-web-literature-search">Step 7 — Optional: use web/literature search</h3>
+<p>For a toy dataset, this is optional. If you want context:</p>
+<pre><code class="language-text">Search the web for the original Iris dataset citation and add a short source note to the wiki. Cite the source URL.
+</code></pre>
+<p>This uses <code>web_search</code> or URL <code>read</code>, then folds the citation into the wiki.</p>
+<h3 id="step-8-commit-the-research-state">Step 8 — Commit the research state</h3>
+<p>When the analysis is reproducible and the wiki/journal are updated:</p>
+<pre><code class="language-sh">git add .sk/wiki .sk/journal reports/iris-baseline experiments/iris_baseline.py
+git commit -m &quot;docs: record iris baseline research workflow&quot;
+</code></pre>
+<p>You can ask Scidekick to do this:</p>
+<pre><code class="language-text">Review the Iris artifacts for reproducibility, then commit only the wiki, journal, reports, and experiment script with a concise message.
+</code></pre>
+<h2 id="8-suggested-prompt-patterns">8. Suggested prompt patterns</h2>
+<h3 id="repository-understanding">Repository understanding</h3>
+<pre><code class="language-text">Explain this repository. Start with the package map, then identify the main runtime entry points and the first files a new contributor should read.
+</code></pre>
+<h3 id="safe-refactor">Safe refactor</h3>
+<pre><code class="language-text">Refactor this exported API. First run LSP references, then update callsites, then run the focused tests that cover the changed package.
+</code></pre>
+<h3 id="research-ingest">Research ingest</h3>
+<pre><code class="language-text">Read docs/scidekick-science-surface.md and create wiki pages for the papers, benchmarks, tools, and standards it references. Use concise summaries and link each page to Scidekick&#39;s design decision.
+</code></pre>
+<h3 id="experiment-analysis">Experiment analysis</h3>
+<pre><code class="language-text">Use Python eval to analyze this CSV, write metrics and plots to reports/&lt;name&gt;/, update the wiki experiment page, and add a journal entry with the decision.
+</code></pre>
+<h3 id="review-before-publishing">Review before publishing</h3>
+<pre><code class="language-text">Review the uncommitted changes as release-blocking. Prioritize correctness, missing tests, data loss, and user-facing documentation drift.
+</code></pre>
+<h2 id="9-what-scidekick-deliberately-does-not-do-yet">9. What Scidekick deliberately does not do yet</h2>
+<p>Scidekick is not yet a full MLflow replacement, LangSmith replacement, DVC replacement, or lab notebook app. It should link to those systems and keep the scientific index.</p>
+<p>The current science surface does not yet provide first-class commands for:</p>
+<ul>
+<li>experiment/run object stores;</li>
+<li>sweep launch and comparison;</li>
+<li>model and dataset card generation;</li>
+<li>trace import/export;</li>
+<li>rollout storage;</li>
+<li>taskset validation;</li>
+<li>judge calibration;</li>
+<li>automatic skill evolution.</li>
+</ul>
+<p>Those features are in the architecture and science-surface plans. The current way to get the same practical value is to combine normal project files, <code>eval</code>, <code>bash</code>, the wiki, the journal, and commits.</p>
+<h2 id="10-where-to-go-next">10. Where to go next</h2>
+<ul>
+<li><code>docs/scidekick-architecture.md</code> — current architecture and roadmap.</li>
+<li><code>docs/scidekick-science-surface.md</code> — long-term research object model.</li>
+<li><code>docs/scidekick-implementation-plan.md</code> — implementation order.</li>
+<li><code>docs/tools/</code> — individual tool references.</li>
+<li><code>docs/models.md</code> — provider and model configuration.</li>
+<li><code>docs/mcp-config.md</code> — MCP setup.</li>
+<li><code>docs/skills/</code> — extension and skill authoring.</li>
+<li><code>.sk/wiki/index.md</code> — local project wiki, including papers and systems that informed Scidekick.</li>
+</ul>
+
+	</article>
+</main>
+<footer>
+	<div class="footer-inner">
+		<span>◉ Scidekick</span>
+		<span><a href="https://github.com/felippe-alves/scidekick/blob/main/docs/scidekick-user-guide.md">Edit this page on GitHub</a></span>
+	</div>
+</footer>
+</body>
+</html>
