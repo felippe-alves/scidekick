@@ -16,15 +16,14 @@ Durable project knowledge for papers, runs, notes, claims, methods, and research
 | [AutoScientists](autoscientists.md) | Automated scientific research agents (MIMS Harvard, 2026) |
 | [SkillLens](skillens.md) | Per-model skill validation metadata (MSR, 2026) |
 
-
-## Infra &amp; tools
+## Infra & tools
 
 | Page | Description |
 |---|---|
 | [Pi (original)](pi-original.md) | Upstream coding agent by Mario Zechner |
 | [MLflow](mlflow.md) | ML lifecycle platform |
 | [DVC](dvc.md) | Data version control for ML |
-| [Hugging Face Cards](huggingface-cards.md) | Model &amp; dataset card formats |
+| [Hugging Face Cards](huggingface-cards.md) | Model & dataset card formats |
 | [OpenAI Evals](openai-evals.md) | LLM evaluation framework |
 | [LM Evaluation Harness](lm-eval-harness.md) | EleutherAI benchmark framework |
 | [OpenTelemetry](opentelemetry.md) | Observability framework |
@@ -33,10 +32,10 @@ Durable project knowledge for papers, runs, notes, claims, methods, and research
 | [LangSmith](langsmith.md) | LLM tracing platform |
 | [Langfuse](langfuse.md) | Open-source LLM engineering |
 | [Braintrust](braintrust.md) | AI evaluation platform |
-| [Weights &amp; Biases](wandb.md) | ML experiment tracking |
-| [RO-Crate](ro-crate.md) | Research object packaging standard |
+| [Weights & Biases](wandb.md) | ML experiment tracking |
+| [RO-Crate](ro-crate-paper.md) | Research object packaging standard |
 | [OpenReview](openreview.md) | Open peer review platform |
-| [NeurIPS 2026](neurips-2026.md) | Evaluations &amp; Datasets Track |
+| [NeurIPS 2026](neurips-2026.md) | Evaluations & Datasets Track |
 | [Puppeteer](puppeteer.md) | Headless Chrome automation |
 | [ast-grep](ast-grep.md) | Structural code search |
 | [tree-sitter](tree-sitter.md) | Incremental parsing library |
@@ -51,5 +50,6 @@ Durable project knowledge for papers, runs, notes, claims, methods, and research
 
 ## Project pages
 
-+- [Scidekick Project Overview](scidekick-project-overview.md)
-+- [Scidekick Science Surface](scidekick-science-surface.md)
+- [Scidekick Project Overview](scidekick-project-overview.md)
+- [Scidekick Science Surface](scidekick-science-surface.md)
+- [Scidekick User Guide](../../docs/scidekick-user-guide.md)

@@ -54,6 +54,10 @@ mise use -g github:can1357/oh-my-pi
 
 macOS · Linux · Windows · bun ≥ 1.3.14
 
+## User guide
+
+New to Scidekick? Start with the [Scidekick User Guide](docs/scidekick-user-guide.md). It explains the inherited Pi and Oh My Pi coding-agent features, Scidekick's research wiki and journal, model/skill setup, and a worked Iris dataset research tutorial.
+
 ### Shell completions
 
 `omp` generates its own completion scripts for **bash**, **zsh**, and **fish** from the live command/flag metadata, so they never drift from the actual CLI. Subcommands, flags, and enum values complete statically; model names (`--model`, `--smol`, `--slow`, `--plan`) resolve against the bundled model catalog and `--resume` against your on-disk sessions.
