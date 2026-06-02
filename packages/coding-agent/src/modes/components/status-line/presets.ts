@@ -2,9 +2,9 @@ import type { PresetDef, StatusLinePreset } from "./types";
 
 export const STATUS_LINE_PRESETS: Record<StatusLinePreset, PresetDef> = {
 	scidekick: {
-		leftSegments: ["pi", "model", "path", "git", "cost"],
-		rightSegments: [],
-		separator: "scidekick",
+		leftSegments: ["pi", "model", "mode", "path", "git", "context_pct", "cost"],
+		rightSegments: ["session_name"],
+		separator: "powerline-thin",
 		segmentOptions: {
 			model: { showThinkingLevel: false, showIcon: false },
 			path: { abbreviate: true, maxLength: 40, stripWorkPrefix: true },
