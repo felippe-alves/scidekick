@@ -28,9 +28,10 @@ async function runCli(args: string[]): Promise<{ stdout: string; stderr: string;
 describe("Scidekick CLI identity", () => {
 	it("prints scidekick as the default app name in version output", async () => {
 		const result = await runCli(["--version"]);
+		const { VERSION } = await import("@oh-my-pi/pi-utils");
 
 		expect(result.exitCode).toBe(0);
-		expect(result.stdout.trim()).toBe("scidekick/1.1.0");
+		expect(result.stdout.trim()).toBe(`scidekick/${VERSION}`);
 	});
 
 	it("uses scidekick and .sk in root help examples", async () => {
