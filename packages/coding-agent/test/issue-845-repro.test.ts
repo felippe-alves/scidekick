@@ -16,7 +16,7 @@ import { resolveUpdateMethodForTest } from "../src/cli/update-cli";
 // We reproduce the realpath-resolution bug with a symlink (works on macOS /
 // Linux; the bug is realpath, not junction-specific).
 
-describe("issue-845: resolveUpdateMethod follows symlinks/junctions", () => {
+describe("issue-845: resolveUpdateMethod always returns binary for scidekick", () => {
 	let tmpRoot: string;
 	let realBinDir: string;
 	let linkedBinDir: string;
@@ -37,16 +37,15 @@ describe("issue-845: resolveUpdateMethod follows symlinks/junctions", () => {
 		fs.rmSync(tmpRoot, { recursive: true, force: true });
 	});
 
-	it("classifies omp reached through a symlinked bin dir as bun-managed", () => {
-		// $which resolves through the symlink, `bun pm bin -g` returns the real path
-		// (or vice versa). Either direction must be recognized.
+	it("returns binary even when binary is reached through a symlinked bun bin dir", () => {
+		// Scidekick has no npm package, so the binary update path is always used.
 		const method = resolveUpdateMethodForTest(ompPathViaLink, realBinDir);
-		expect(method).toBe("bun");
+		expect(method).toBe("binary");
 	});
 
-	it("classifies omp at the real bin dir as bun-managed when bunBinDir is symlinked", () => {
+	it("returns binary even when bunBinDir itself is symlinked", () => {
 		const ompAtReal = path.join(realBinDir, "omp");
 		const method = resolveUpdateMethodForTest(ompAtReal, linkedBinDir);
-		expect(method).toBe("bun");
+		expect(method).toBe("binary");
 	});
 });

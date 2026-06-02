@@ -161,9 +161,9 @@ async function checkRuntime(): Promise<DoctorCheck> {
 	}
 	return checkOk("runtime", `Bun ${Bun.version}; ${APP_NAME} ${VERSION}`);
 }
-
 async function checkPath(): Promise<DoctorCheck> {
-	const resolved = $which(APP_NAME, { cache: WHICH_CACHE_BYPASS });
+	const binaryName = "sk";
+	const resolved = $which(binaryName, { cache: WHICH_CACHE_BYPASS });
 	if (!resolved) {
 		return checkWarn(
 			"path",

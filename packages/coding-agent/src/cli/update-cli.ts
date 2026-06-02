@@ -95,48 +95,13 @@ async function getBunGlobalBinDir(): Promise<string | undefined> {
 	}
 }
 
-function normalizePathForComparison(filePath: string): string {
-	const normalized = path.normalize(filePath);
-	if (process.platform === "win32") return normalized.toLowerCase();
-	return normalized;
-}
-
-function tryRealpath(p: string): string | undefined {
-	try {
-		return fs.realpathSync.native(p);
-	} catch {
-		return undefined;
-	}
-}
-
-function isPathInDirectoryLexical(filePath: string, directoryPath: string): boolean {
-	const normalizedPath = normalizePathForComparison(path.resolve(filePath));
-	const normalizedDirectory = normalizePathForComparison(path.resolve(directoryPath));
-	const relativePath = path.relative(normalizedDirectory, normalizedPath);
-	return relativePath === "" || (!relativePath.startsWith("..") && !path.isAbsolute(relativePath));
-}
-
-function isPathInDirectory(filePath: string, directoryPath: string): boolean {
-	if (isPathInDirectoryLexical(filePath, directoryPath)) return true;
-	// Layer realpath resolution on top of the lexical guard. On Windows, ~/.bun
-	// is a junction when Bun is installed via Scoop, so `bun pm bin -g` and the
-	// PATH-resolved omp path can refer to the same directory through different
-	// strings. path.resolve does not traverse junctions/symlinks; realpath does.
-	// Resolve the file's parent directory to tolerate the file itself not yet
-	// existing (e.g. a fresh install path) while still catching link-traversed
-	// equality once the directory exists.
-	const fileDir = tryRealpath(path.dirname(path.resolve(filePath)));
-	const dirReal = tryRealpath(path.resolve(directoryPath));
-	if (!fileDir || !dirReal) return false;
-	const resolvedFile = path.join(fileDir, path.basename(filePath));
-	return isPathInDirectoryLexical(resolvedFile, dirReal);
-}
-
 type UpdateTarget = { method: "bun" } | { method: "binary"; path: string };
 
-function resolveUpdateMethod(ompPath: string, bunBinDir: string | undefined): "bun" | "binary" {
-	if (!bunBinDir) return "binary";
-	return isPathInDirectory(ompPath, bunBinDir) ? "bun" : "binary";
+function resolveUpdateMethod(_ompPath: string, _bunBinDir: string | undefined): "bun" | "binary" {
+	// Scidekick: no npm package exists, so always use the binary update path (GitHub releases).
+	// The original vendor check (isPathInDirectory(ompPath, bunBinDir) ? "bun" : "binary")
+	// doesn't apply since @scidekick/cli is not published to npm.
+	return "binary";
 }
 
 export function resolveUpdateMethodForTest(ompPath: string, bunBinDir: string | undefined): "bun" | "binary" {
@@ -148,11 +113,12 @@ async function resolveUpdateTarget(): Promise<UpdateTarget> {
 
 	if (ompPath) {
 		const method = resolveUpdateMethod(ompPath, bunBinDir);
-		if (method === "bun") return { method };
 		return { method, path: ompPath };
 	}
 
-	if (bunBinDir) return { method: "bun" };
+	// Fallback: if bun is installed, the binary is likely in bun's global bin dir.
+	// Construct the expected path (scidekick binary is always "sk") and use binary update.
+	if (bunBinDir) return { method: "binary", path: path.join(bunBinDir, "sk") };
 
 	throw new Error(`Could not resolve ${APP_NAME} binary path in PATH`);
 }
@@ -303,7 +269,9 @@ export function selectManifestArtifact(manifest: ReleaseManifest, binaryName: st
  * Resolve the path that `omp` maps to in the user's PATH.
  */
 function resolveOmpPath(): string | undefined {
-	return $which(APP_NAME) ?? undefined;
+	// Scidekick: the binary is "sk", not APP_NAME which is the display name "scidekick"
+	const binaryName = "sk";
+	return $which(binaryName) ?? undefined;
 }
 
 /**

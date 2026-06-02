@@ -24,13 +24,13 @@ afterEach(async () => {
 	await Promise.all(tempDirs.splice(0).map(dir => fs.rm(dir, { recursive: true, force: true })));
 });
 describe("update-cli install target detection", () => {
-	it("uses bun update when prioritized omp is inside bun global bin", () => {
+	it("uses binary update regardless of bun global bin (scidekick has no npm package)", () => {
 		const method = resolveUpdateMethodForTest("/Users/test/.bun/bin/omp", "/Users/test/.bun/bin");
 
-		expect(method).toBe("bun");
+		expect(method).toBe("binary");
 	});
 
-	it("uses binary update when prioritized omp is outside bun global bin", () => {
+	it("uses binary update when binary is outside bun global bin", () => {
 		const method = resolveUpdateMethodForTest("/Users/test/.local/bin/omp", "/Users/test/.bun/bin");
 
 		expect(method).toBe("binary");

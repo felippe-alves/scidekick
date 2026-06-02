@@ -13,6 +13,9 @@
 - Changed Scidekick status line preset: `powerline-thin` separators, added mode/context_pct/session_name/thinking intensity segments.
 - Added skill validation gate on session start: warns when loaded skills have not been validated with the current model via the SkillRegistry.
 
+### Fixed
+
+- Fixed `sk update` failing with "Failed to fetch release info: Not Found" due to APP_NAME/binary-name mismatch and missing npm package for the bun update path.
 
 ## [15.7.4] - 2026-05-31
 ### Added
