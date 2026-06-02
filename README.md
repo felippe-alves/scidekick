@@ -208,6 +208,17 @@ sk acp
 
 Scidekick speaks the Agent Client Protocol over JSON-RPC. Editors can route file writes, terminal output, and permission prompts through their own UI.
 
+The easiest way to set up ACP is the `acp-install` command:
+
+```sh
+sk acp-install zed       # Configure Zed
+sk acp-install vscode    # Configure VS Code (user settings)
+sk acp-install vscode -w # Configure VS Code (workspace settings)
+sk acp-install --help    # Show all options
+```
+
+It resolves the `sk` binary path automatically, merges the entry into your editor settings, and creates a timestamped backup.
+
 #### Zed
 
 Zed has native external-agent support through ACP. Add Scidekick to Zed's `settings.json` under `agent_servers`:

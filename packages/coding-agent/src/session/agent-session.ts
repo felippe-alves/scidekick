@@ -175,6 +175,7 @@ import planModeToolDecisionReminderPrompt from "../prompts/system/plan-mode-tool
 import ttsrInterruptTemplate from "../prompts/system/ttsr-interrupt.md" with { type: "text" };
 import ttsrToolReminderTemplate from "../prompts/system/ttsr-tool-reminder.md" with { type: "text" };
 import { type AgentRegistry, MAIN_AGENT_ID } from "../registry/agent-registry";
+import { SkillRegistry } from "../scidekick/skill-registry";
 import { deobfuscateSessionContext, type SecretObfuscator } from "../secrets/obfuscator";
 import { invalidateHostMetadata } from "../ssh/connection-manager";
 import {
@@ -1090,6 +1091,22 @@ export class AgentSession {
 		this.#extensionRunner = config.extensionRunner;
 		this.#skills = config.skills ?? [];
 		this.#skillWarnings = config.skillWarnings ?? [];
+
+		// Skill validation gate: warn about unvalidated skill+model pairs.
+		// SkillLens (MSR 2026): 25% of unvalidated skill–model pairs cause negative transfer.
+		const currentModel = this.model;
+		if (currentModel && this.#skills.length > 0) {
+			const registry = new SkillRegistry();
+			const unvalidated = registry.getUnvalidatedSkills(currentModel.id);
+			for (const skill of this.#skills) {
+				if (unvalidated.some(u => u.name === skill.name)) {
+					this.configWarnings.push(
+						`Skill "${skill.name}" not validated for model ${currentModel.id}. Performance may vary.`,
+					);
+				}
+			}
+			registry.close();
+		}
 		this.#customCommands = config.customCommands ?? [];
 		this.#skillsSettings = config.skillsSettings;
 		this.#modelRegistry = config.modelRegistry;

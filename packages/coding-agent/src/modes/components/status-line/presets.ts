@@ -6,7 +6,7 @@ export const STATUS_LINE_PRESETS: Record<StatusLinePreset, PresetDef> = {
 		rightSegments: ["session_name"],
 		separator: "powerline-thin",
 		segmentOptions: {
-			model: { showThinkingLevel: false, showIcon: false },
+			model: { showThinkingLevel: true, showIcon: false },
 			path: { abbreviate: true, maxLength: 40, stripWorkPrefix: true },
 			git: { showBranch: true, showStaged: false, showUnstaged: false, showUntracked: false },
 		},
