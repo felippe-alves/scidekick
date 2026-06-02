@@ -208,6 +208,49 @@ sk acp
 
 Scidekick speaks the Agent Client Protocol over JSON-RPC. Editors can route file writes, terminal output, and permission prompts through their own UI.
 
+#### Zed
+
+Zed has native external-agent support through ACP. Add Scidekick to Zed's `settings.json` under `agent_servers`:
+
+```json
+{
+  "agent_servers": {
+    "Scidekick": {
+      "type": "custom",
+      "command": "/absolute/path/to/sk",
+      "args": ["acp"],
+      "env": {
+        "ANTHROPIC_API_KEY": "...",
+        "OPENAI_API_KEY": "..."
+      }
+    }
+  }
+}
+```
+
+Use `command -v sk` to find the absolute path. If Zed is launched from Finder/Dock, pass provider keys in `env` because it may not inherit your shell environment. Then open Zed's agent panel, start a new external-agent thread, and choose **Scidekick**. Use **dev: open acp logs** from the command palette to inspect protocol traffic.
+
+#### VS Code
+
+VS Code does not currently ship a built-in ACP client. Install an ACP client extension such as [ACP Client](https://marketplace.visualstudio.com/items?itemName=formulahendry.acp-client), then add Scidekick to user or workspace settings:
+
+```json
+{
+  "acp.agents": {
+    "Scidekick": {
+      "command": "/absolute/path/to/sk",
+      "args": ["acp"],
+      "env": {
+        "ANTHROPIC_API_KEY": "...",
+        "OPENAI_API_KEY": "..."
+      }
+    }
+  }
+}
+```
+
+Open the ACP Client panel, connect to **Scidekick**, and start a conversation. The extension's traffic log is useful for diagnosing startup, auth, or permission issues.
+
 ### RPC mode
 
 ```sh
