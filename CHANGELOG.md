@@ -1,5 +1,18 @@
 # Changelog
 
+## [Unreleased]
+
+### Added
+
+- Added `sk acp-install <target>` command for one-command ACP setup in Zed and VS Code (user and workspace).
+- Added skill validation gate: session start warns when loaded skills have not been validated with the current model.
+- Added thinking intensity display to the Scidekick status line preset.
+
+### Changed
+
+- Rewrote README.md for Scidekick branding, added ACP editor setup docs for Zed and VS Code.
+- Changed Scidekick status line preset to `powerline-thin` with mode, context usage, session name, and thinking level segments.
+
 ## [1.1.0] - 2026-05-31
 
 ### Added
