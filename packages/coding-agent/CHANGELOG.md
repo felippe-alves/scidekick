@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [1.2.0] - 2026-06-02
+
 ### Added
 
 - Added `acp-install` command for one-command ACP setup in Zed and VS Code (user and workspace settings).
