@@ -2004,6 +2004,17 @@ export const SETTINGS_SCHEMA = {
 	},
 
 	// Bash interceptor
+
+	"lsp.diagnosticsDeduplicate": {
+		type: "boolean",
+		default: true,
+		ui: {
+			tab: "editing",
+			label: "Deduplicate Diagnostics",
+			description: "Suppress post-edit LSP diagnostics already shown for a file; only surface new or changed ones",
+		},
+	},
+
 	"bashInterceptor.enabled": {
 		type: "boolean",
 		default: false,
