@@ -253,6 +253,8 @@ import type {
 } from "./session-manager";
 import { getLatestCompactionEntry } from "./session-manager";
 import type { ShakeMode, ShakeResult } from "./shake-types";
+import { SOURCE_IDS } from "./source-ids";
+import { SourceRegistry } from "./source-registry";
 import { ToolChoiceQueue } from "./tool-choice-queue";
 import { YieldQueue } from "./yield-queue";
 
@@ -926,11 +928,17 @@ export class AgentSession {
 
 	#skills: Skill[];
 	#skillWarnings: SkillWarning[];
-
 	// Custom commands (TypeScript slash commands)
 	#customCommands: LoadedCustomCommand[] = [];
 	/** MCP prompt commands (updated dynamically when prompts are loaded) */
 	#mcpPromptCommands: LoadedCustomCommand[] = [];
+
+	// ── Source-aware command registry (migration path) ──────────────────────
+	// Populated by setSlashCommands/setMCPPromptCommands in parallel with the
+	// legacy arrays. When all consumers switch to the registry, the arrays are
+	// removed and these become the canonical sources.
+	readonly #commandRegistry = new SourceRegistry<FileSlashCommand>();
+	readonly #customCommandRegistry = new SourceRegistry<LoadedCustomCommand>();
 
 	#skillsSettings: SkillsSettings | undefined;
 
@@ -1108,6 +1116,7 @@ export class AgentSession {
 		}
 		this.#promptTemplates = config.promptTemplates ?? [];
 		this.#slashCommands = config.slashCommands ?? [];
+		this.#commandRegistry.replaceSource(SOURCE_IDS.FILE_COMMANDS, this.#slashCommands);
 		this.#extensionRunner = config.extensionRunner;
 		this.#skills = config.skills ?? [];
 		this.#skillWarnings = config.skillWarnings ?? [];
@@ -1128,6 +1137,7 @@ export class AgentSession {
 			registry.close();
 		}
 		this.#customCommands = config.customCommands ?? [];
+		this.#customCommandRegistry.replaceSource(SOURCE_IDS.CUSTOM_COMMANDS, this.#customCommands);
 		this.#skillsSettings = config.skillsSettings;
 		this.#modelRegistry = config.modelRegistry;
 		this.#validateRetryFallbackChains();
@@ -4007,6 +4017,13 @@ export class AgentSession {
 	/** Replace file-based slash commands used for prompt expansion. */
 	setSlashCommands(slashCommands: FileSlashCommand[]): void {
 		this.#slashCommands = [...slashCommands];
+		this.#commandRegistry.replaceSource(SOURCE_IDS.FILE_COMMANDS, slashCommands);
+	}
+
+	/** Update the MCP prompt commands list. Called when server prompts are (re)loaded. */
+	setMCPPromptCommands(commands: LoadedCustomCommand[]): void {
+		this.#mcpPromptCommands = commands;
+		this.#customCommandRegistry.replaceSource(SOURCE_IDS.MCP_PROMPTS, commands);
 	}
 
 	/** Custom commands (TypeScript slash commands and MCP prompts) */
@@ -4015,9 +4032,13 @@ export class AgentSession {
 		return [...this.#customCommands, ...this.#mcpPromptCommands];
 	}
 
-	/** Update the MCP prompt commands list. Called when server prompts are (re)loaded. */
-	setMCPPromptCommands(commands: LoadedCustomCommand[]): void {
-		this.#mcpPromptCommands = commands;
+	/**
+	 * Source-aware snapshot of all registered commands (file-based, custom,
+	 * MCP prompts). Migration target — callers should prefer this over
+	 * separate slashCommands / customCommands / setMCPPromptCommands reads.
+	 */
+	get commandRegistrySnapshot(): ReadonlyArray<LoadedCustomCommand> {
+		return this.#customCommandRegistry.snapshot();
 	}
 
 	/**
