@@ -15,7 +15,7 @@
     },
     "packages/agent": {
       "name": "@oh-my-pi/pi-agent-core",
-      "version": "15.7.3",
+      "version": "15.8.2",
       "dependencies": {
         "@oh-my-pi/pi-ai": "catalog:",
         "@oh-my-pi/pi-natives": "catalog:",
@@ -30,7 +30,7 @@
     },
     "packages/ai": {
       "name": "@oh-my-pi/pi-ai",
-      "version": "15.7.3",
+      "version": "15.8.2",
       "dependencies": {
         "@anthropic-ai/sdk": "catalog:",
         "@bufbuild/protobuf": "catalog:",
@@ -45,7 +45,7 @@
     },
     "packages/coding-agent": {
       "name": "@oh-my-pi/pi-coding-agent",
-      "version": "15.7.3",
+      "version": "15.8.2",
       "bin": {
         "sk": "src/cli.ts",
       },
@@ -85,7 +85,7 @@
     },
     "packages/hashline": {
       "name": "@oh-my-pi/hashline",
-      "version": "15.7.3",
+      "version": "15.8.2",
       "dependencies": {
         "diff": "catalog:",
         "lru-cache": "catalog:",
@@ -96,7 +96,7 @@
     },
     "packages/mnemopi": {
       "name": "@oh-my-pi/pi-mnemopi",
-      "version": "15.7.3",
+      "version": "15.8.2",
       "bin": {
         "mnemopi": "src/cli.ts",
       },
@@ -113,7 +113,7 @@
     },
     "packages/natives": {
       "name": "@oh-my-pi/pi-natives",
-      "version": "15.7.3",
+      "version": "15.8.2",
       "devDependencies": {
         "@napi-rs/cli": "catalog:",
         "@types/bun": "catalog:",
@@ -133,7 +133,7 @@
     },
     "packages/stats": {
       "name": "@oh-my-pi/omp-stats",
-      "version": "15.7.3",
+      "version": "15.8.2",
       "bin": {
         "omp-stats": "./src/index.ts",
       },
@@ -174,7 +174,7 @@
     },
     "packages/tui": {
       "name": "@oh-my-pi/pi-tui",
-      "version": "15.7.3",
+      "version": "15.8.2",
       "dependencies": {
         "@oh-my-pi/pi-natives": "catalog:",
         "@oh-my-pi/pi-utils": "catalog:",
@@ -215,7 +215,7 @@
     },
     "packages/utils": {
       "name": "@oh-my-pi/pi-utils",
-      "version": "15.7.3",
+      "version": "15.8.2",
       "dependencies": {
         "@oh-my-pi/pi-natives": "catalog:",
         "beautiful-mermaid": "catalog:",
@@ -256,15 +256,15 @@
     "@huggingface/transformers": "^4.2.0",
     "@mozilla/readability": "^0.6.0",
     "@napi-rs/cli": "3.7.0",
-    "@oh-my-pi/hashline": "15.7.3",
-    "@oh-my-pi/omp-stats": "15.7.3",
-    "@oh-my-pi/pi-agent-core": "15.7.3",
-    "@oh-my-pi/pi-ai": "15.7.3",
-    "@oh-my-pi/pi-coding-agent": "15.7.3",
-    "@oh-my-pi/pi-mnemopi": "15.7.3",
-    "@oh-my-pi/pi-natives": "15.7.3",
-    "@oh-my-pi/pi-tui": "15.7.3",
-    "@oh-my-pi/pi-utils": "15.7.3",
+    "@oh-my-pi/hashline": "15.8.2",
+    "@oh-my-pi/omp-stats": "15.8.2",
+    "@oh-my-pi/pi-agent-core": "15.8.2",
+    "@oh-my-pi/pi-ai": "15.8.2",
+    "@oh-my-pi/pi-coding-agent": "15.8.2",
+    "@oh-my-pi/pi-mnemopi": "15.8.2",
+    "@oh-my-pi/pi-natives": "15.8.2",
+    "@oh-my-pi/pi-tui": "15.8.2",
+    "@oh-my-pi/pi-utils": "15.8.2",
     "@opentelemetry/api": "^1.9.1",
     "@opentelemetry/context-async-hooks": "^2.7.1",
     "@opentelemetry/sdk-trace-base": "^2.7.1",
