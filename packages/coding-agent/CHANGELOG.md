@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Changed
+
+- Corrected `@oh-my-pi/*` package versions from `1.2.0` to `15.7.3` to reflect the upstream Oh My Pi fork point. Added `scripts/sync-vendor-version.ts` and `scripts/check-upstream-safety.ts` to automate version tracking and upstream merge safety checks.
+
 ## [1.2.0] - 2026-06-02
 
 ### Added
