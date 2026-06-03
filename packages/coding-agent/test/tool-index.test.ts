@@ -37,12 +37,10 @@ describe("getSchemaPropertyKeys", () => {
 	});
 
 	it("prefers Zod shape over JSON properties when both present", () => {
-		// A ZodObject has both `type: "object"` and a `shape`, plus
-		// possibly a `properties` field set by some wrappers.
 		const schema = z.object({ alpha: z.string(), beta: z.number() });
 		// Simulate a stray properties field.
-		(schema as Record<string, unknown>).properties = { gamma: { type: "string" } };
+		(schema as unknown as Record<string, unknown>).properties = { gamma: { type: "string" } };
 		expect(getSchemaPropertyKeys(schema)).toEqual(["alpha", "beta"]);
-		delete (schema as Record<string, unknown>).properties;
+		delete (schema as unknown as Record<string, unknown>).properties;
 	});
 });

@@ -89,6 +89,48 @@ export interface SourceMeta {
 }
 
 /**
+ * Trust level for extension/plugin-sourced capabilities.
+ */
+export type TrustLevel = "builtin" | "verified" | "community" | "untrusted";
+
+/**
+ * Scope a capability originates from.
+ */
+export type CapabilityScope = "project" | "user" | "builtin" | "plugin";
+
+/**
+ * Which category of capability this is.
+ */
+export type CapabilityKind =
+	| "mcp-server"
+	| "skill"
+	| "hook"
+	| "tool"
+	| "command"
+	| "agent"
+	| "rule"
+	| "prompt"
+	| "context-file"
+	| "extension";
+
+/**
+ * Normalized capability envelope. Every provider should emit
+ * `DiscoveredCapability<T>[]` with env expansion, path resolution, and
+ * source metadata already applied.
+ *
+ * Downstream registries and consumers work with this one shape instead of
+ * repeating provider-specific normalization.
+ */
+export interface DiscoveredCapability<T> {
+	kind: CapabilityKind;
+	id: string;
+	value: T;
+	source: SourceMeta;
+	scope: CapabilityScope;
+	trust: TrustLevel;
+}
+
+/**
  * Merged result from loading a capability across all providers.
  */
 export interface CapabilityResult<T> {
