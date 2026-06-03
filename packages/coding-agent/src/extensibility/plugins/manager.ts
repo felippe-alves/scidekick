@@ -60,6 +60,7 @@ import type {
 	PluginSettingSchema,
 	ProjectPluginOverrides,
 } from "./types";
+import { classifyPluginRisk } from "./types";
 
 // =============================================================================
 // Validation
@@ -252,6 +253,8 @@ export class PluginManager {
 				manifest: { version: "0.0.0-dryrun" },
 				enabledFeatures: spec.features === "*" ? null : (spec.features as string[] | null),
 				enabled: true,
+				capabilities: undefined,
+				risk: "low",
 			};
 		}
 		const pkgJsonPath = getPluginsPackageJson();
@@ -361,6 +364,8 @@ export class PluginManager {
 			manifest,
 			enabledFeatures,
 			enabled: true,
+			capabilities: manifest.capabilities,
+			risk: classifyPluginRisk(manifest.capabilities ?? {}),
 		};
 	}
 
@@ -430,7 +435,6 @@ export class PluginManager {
 			// Apply project overrides
 			const isDisabledInProject = projectOverrides.disabled?.includes(name) ?? false;
 			const projectFeatures = projectOverrides.features?.[name];
-
 			plugins.push({
 				name,
 				version: pluginPkg.version,
@@ -438,6 +442,8 @@ export class PluginManager {
 				manifest,
 				enabledFeatures: projectFeatures ?? runtimeState.enabledFeatures,
 				enabled: runtimeState.enabled && !isDisabledInProject,
+				capabilities: manifest.capabilities,
+				risk: classifyPluginRisk(manifest.capabilities ?? {}),
 			});
 		}
 
@@ -465,6 +471,8 @@ export class PluginManager {
 				manifest,
 				enabledFeatures: projectFeatures ?? runtimeState.enabledFeatures,
 				enabled: runtimeState.enabled !== false && !isDisabledInProject,
+				capabilities: manifest.capabilities,
+				risk: classifyPluginRisk(manifest.capabilities ?? {}),
 			});
 		}
 
@@ -530,6 +538,8 @@ export class PluginManager {
 			manifest,
 			enabledFeatures: null,
 			enabled: true,
+			capabilities: manifest.capabilities,
+			risk: classifyPluginRisk(manifest.capabilities ?? {}),
 		};
 	}
 

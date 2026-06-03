@@ -46,9 +46,45 @@ export interface PluginManifest {
 
 	/** Settings schema for plugin configuration */
 	settings?: Record<string, PluginSettingSchema>;
+
+	/** Capabilities this plugin requests. Empty = no special capabilities needed. */
+	capabilities?: PluginCapabilitySet;
 }
 
-// =============================================================================
+// ── Capability permission model ──────────────────────────────────────────────
+
+/** Capability groups a plugin may contribute. */
+export interface PluginCapabilitySet {
+	/** Custom LLM-callable tools. Risk: medium. */
+	tools?: boolean;
+	/** Lifecycle hooks (beforeTurn, afterToolCall, etc.). Risk: high. */
+	hooks?: boolean;
+	/** Custom /slash commands. Risk: medium. */
+	commands?: boolean;
+	/** MCP server configs or tool contributions. Risk: high. */
+	mcp?: boolean;
+	/** Installable skills (scientific workflows, automation). Risk: medium. */
+	skills?: boolean;
+	/** Custom sub-agents. Risk: medium. */
+	agents?: boolean;
+	/** Rules / instructions for the system prompt. Risk: low. */
+	rules?: boolean;
+	/** Prompt templates. Risk: low. */
+	prompts?: boolean;
+}
+
+/** Trust classification for a plugin's capabilities. */
+export type PluginRiskLevel = "low" | "medium" | "high";
+
+/**
+ * Classify the risk level of a capability set based on which groups are enabled.
+ * High-risk capabilities (hooks, MCP) push the level to "high" regardless of others.
+ */
+export function classifyPluginRisk(caps: PluginCapabilitySet): PluginRiskLevel {
+	if (caps.hooks || caps.mcp) return "high";
+	if (caps.tools || caps.commands || caps.skills || caps.agents) return "medium";
+	return "low";
+}
 // Plugin Settings Schema Types
 // =============================================================================
 
@@ -116,6 +152,10 @@ export interface InstalledPlugin {
 	enabledFeatures: string[] | null;
 	/** Whether the plugin is enabled */
 	enabled: boolean;
+	/** Requested capability set from the manifest. */
+	capabilities?: PluginCapabilitySet;
+	/** Risk classification derived from capabilities. */
+	risk: PluginRiskLevel;
 }
 
 // =============================================================================

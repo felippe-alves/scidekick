@@ -10,6 +10,7 @@ import { getPluginsLockfile, getPluginsNodeModules, getPluginsPackageJson, isEno
 import { getConfigDirPaths } from "../../config";
 import { installLegacyPiSpecifierShim } from "./legacy-pi-compat";
 import type { InstalledPlugin, PluginManifest, PluginRuntimeConfig, ProjectPluginOverrides } from "./types";
+import { classifyPluginRisk } from "./types";
 
 installLegacyPiSpecifierShim();
 
@@ -132,6 +133,8 @@ export async function getEnabledPlugins(cwd: string, opts: { home?: string } = {
 			manifest,
 			enabledFeatures,
 			enabled: true,
+			capabilities: manifest.capabilities,
+			risk: classifyPluginRisk(manifest.capabilities ?? {}),
 		});
 	}
 

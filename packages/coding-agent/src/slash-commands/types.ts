@@ -67,8 +67,14 @@ export interface SlashCommandRuntime {
 	 * Used by `/mcp reload` and after `/mcp add|remove|enable|disable`.
 	 */
 	reloadMcp: () => Promise<void>;
+	/** Emit a UI notification that title has changed. Optional — ACP adapters wire it; TUI may omit. */
 	notifyTitleChanged?: () => Promise<void> | void;
+	/** Emit a UI notification that config has changed. Optional. */
 	notifyConfigChanged?: () => Promise<void> | void;
+	/** Open a TUI selector (mode picker, file picker, etc.). TUI-only capability. */
+	openSelector?: (kind: string, options: readonly string[]) => Promise<string | undefined>;
+	/** Open the system browser for OAuth/login flows. TUI/ACP capability; unsupported modes throw. */
+	openBrowser?: (url: string) => Promise<void>;
 }
 
 /**

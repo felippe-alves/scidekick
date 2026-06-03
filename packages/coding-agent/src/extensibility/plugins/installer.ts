@@ -3,6 +3,7 @@ import * as path from "node:path";
 import { getAgentDir, getProjectDir, isEnoent } from "@oh-my-pi/pi-utils";
 import { extractPackageName } from "./parser";
 import type { InstalledPlugin } from "./types";
+import { classifyPluginRisk } from "./types";
 
 const PLUGINS_DIR = path.join(getAgentDir(), "plugins");
 
@@ -78,6 +79,8 @@ export async function installPlugin(packageName: string): Promise<InstalledPlugi
 		manifest: pkg.omp || pkg.pi || { version: pkg.version },
 		enabledFeatures: null,
 		enabled: true,
+		capabilities: (pkg.omp || pkg.pi)?.capabilities,
+		risk: classifyPluginRisk((pkg.omp || pkg.pi)?.capabilities ?? {}),
 	};
 }
 
@@ -123,6 +126,8 @@ export async function listPlugins(): Promise<InstalledPlugin[]> {
 				manifest: pkg.omp || pkg.pi || { version: pkg.version },
 				enabledFeatures: null,
 				enabled: true,
+				capabilities: (pkg.omp || pkg.pi)?.capabilities,
+				risk: classifyPluginRisk((pkg.omp || pkg.pi)?.capabilities ?? {}),
 			});
 		}
 	}
