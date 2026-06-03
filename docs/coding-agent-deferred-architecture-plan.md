@@ -187,6 +187,8 @@ makes global-state bugs easier, and makes the class hard to test or modify.
 - Public `AgentSession` behavior is compatible — existing callers work without change.
 - Each controller can be tested in isolation.
 
+**Detailed plan:** [split-agentsession-plan.md](./split-agentsession-plan.md)
+**API contract checklist:** [agentsession-api-contract.md](./agentsession-api-contract.md)
 ---
 
 ## 5. Reduce mode-specific command implementations (item 14)
