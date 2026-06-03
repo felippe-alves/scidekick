@@ -11,7 +11,7 @@ import type { ToolCallContext } from "@oh-my-pi/pi-agent-core";
 import type { Ellipsis } from "@oh-my-pi/pi-natives";
 import type { Component } from "@oh-my-pi/pi-tui";
 import { replaceTabs, truncateToWidth } from "@oh-my-pi/pi-tui";
-import { pluralize } from "@oh-my-pi/pi-utils";
+import { pluralize, sanitizeText } from "@oh-my-pi/pi-utils";
 import { settings } from "../config/settings";
 import type { Theme } from "../modes/theme/theme";
 import { Hasher } from "../tui/utils";
@@ -79,12 +79,32 @@ export const TRUNCATE_LENGTHS = {
 export const EXPAND_HINT = "(Ctrl+O for more)";
 
 // =============================================================================
-// Text Truncation Utilities
+// =============================================================================
+// Text Sanitization
 // =============================================================================
 
 /**
- * Get first N lines of text as preview, with each line truncated.
+ * Sanitize external text for safe TUI display: strip ANSI/VT control sequences,
+ * malformed UTF-16, and other control characters; replace tabs; optionally
+ * collapse newlines/carriage returns for single-line contexts; truncate to
+ * the given width.
+ *
+ * This is the canonical entry point for all TUI text sanitization. One-off
+ * local sanitizers should either delegate to this function or justify why
+ * their needs are genuinely different.
  */
+export function sanitizeForTui(text: string, width: number, opts?: { singleLine?: boolean }): string {
+	let result = sanitizeText(text);
+	result = replaceTabs(result);
+	if (opts?.singleLine) {
+		result = result.replaceAll(/\r?\n/g, " ");
+	}
+	return truncateToWidth(result, width);
+}
+
+// =============================================================================
+// Text Truncation Utilities
+// =============================================================================
 export function getPreviewLines(text: string, maxLines: number, maxLineLen: number, ellipsis?: Ellipsis): string[] {
 	const lines = text.split("\n").filter(l => l.trim());
 	return lines.slice(0, maxLines).map(l => truncateToWidth(l.trim(), maxLineLen, ellipsis));

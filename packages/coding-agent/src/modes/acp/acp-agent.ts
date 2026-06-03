@@ -645,7 +645,6 @@ export class AcpAgent implements Agent {
 		if (skillResult) {
 			return;
 		}
-
 		const builtinResult = await executeAcpBuiltinSlashCommand(text, {
 			session: record.session,
 			sessionManager: record.session.sessionManager,
@@ -654,6 +653,17 @@ export class AcpAgent implements Agent {
 			output: output => this.#emitCommandOutput(record, output),
 			refreshCommands: () => this.#emitAvailableCommandsUpdate(record),
 			reloadPlugins: () => this.#reloadPluginState(record),
+			reloadMcp: async () => {
+				// Disconnect the current manager. The ACP client is expected to
+				// re-send MCP server configs on the next prompt, which triggers
+				// #configureMcpServers with fresh config.
+				if (record.mcpManager) {
+					await record.mcpManager.disconnectAll();
+					record.mcpManager = undefined;
+					await record.session.refreshMCPTools([]);
+				}
+				await this.#emitAvailableCommandsUpdate(record);
+			},
 			notifyTitleChanged: async () => {
 				await this.#connection.sessionUpdate({
 					sessionId: record.session.sessionId,

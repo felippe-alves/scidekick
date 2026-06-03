@@ -21,7 +21,8 @@ export interface ExecOptions {
 export interface ExecResult {
 	stdout: string;
 	stderr: string;
-	code: number;
+	/** Exit code of the process. `undefined` when the process was killed or aborted. */
+	code: number | undefined;
 	killed: boolean;
 }
 
@@ -47,7 +48,7 @@ export async function execCommand(
 	return {
 		stdout: result.stdout,
 		stderr: result.stderr,
-		code: result.exitCode ?? 0,
+		code: result.exitCode ?? undefined,
 		killed: Boolean(result.exitError?.aborted),
 	};
 }

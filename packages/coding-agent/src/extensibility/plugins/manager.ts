@@ -403,6 +403,33 @@ export class PluginManager {
 			});
 		}
 
+		// Linked plugins (created via link()) are stored in runtime config but not
+		// in package.json.dependencies. Include them so `plugin list` shows all
+		// installed plugins regardless of install method.
+		for (const [name, runtimeState] of Object.entries(config.plugins)) {
+			if (deps[name]) continue; // Already listed from dependencies above.
+			const pluginPath = path.join(getPluginsNodeModules(), name);
+			let pluginPkg: { version: string; omp?: PluginManifest; pi?: PluginManifest };
+			try {
+				pluginPkg = await Bun.file(path.join(pluginPath, "package.json")).json();
+			} catch (err) {
+				if (isEnoent(err)) continue;
+				throw err;
+			}
+			const manifest: PluginManifest = pluginPkg.omp || pluginPkg.pi || { version: pluginPkg.version };
+			manifest.version = pluginPkg.version;
+			const isDisabledInProject = projectOverrides.disabled?.includes(name) ?? false;
+			const projectFeatures = projectOverrides.features?.[name];
+			plugins.push({
+				name,
+				version: pluginPkg.version,
+				path: pluginPath,
+				manifest,
+				enabledFeatures: projectFeatures ?? runtimeState.enabledFeatures,
+				enabled: runtimeState.enabled !== false && !isDisabledInProject,
+			});
+		}
+
 		return plugins;
 	}
 

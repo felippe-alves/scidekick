@@ -61,6 +61,12 @@ export interface SlashCommandRuntime {
 	 * after plugin or project-scope changes.
 	 */
 	reloadPlugins: () => Promise<void>;
+	/**
+	 * Reconnect MCP servers from the current config: disconnect all, rediscover
+	 * server configs, connect, and refresh tools/prompts in the session.
+	 * Used by `/mcp reload` and after `/mcp add|remove|enable|disable`.
+	 */
+	reloadMcp: () => Promise<void>;
 	notifyTitleChanged?: () => Promise<void> | void;
 	notifyConfigChanged?: () => Promise<void> | void;
 }

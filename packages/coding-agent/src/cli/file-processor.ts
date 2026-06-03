@@ -27,6 +27,25 @@ export interface ProcessFileOptions {
 	autoResizeImages?: boolean;
 }
 
+/** Quickly check that @file arguments reference files that exist on disk.
+ *  Returns the list of missing paths — empty means all valid. */
+export async function validateFileArgs(fileArgs: string[]): Promise<string[]> {
+	const missing: string[] = [];
+	const cwd = getProjectDir();
+	for (const arg of fileArgs) {
+		const stripped = arg.startsWith("@") ? arg.slice(1) : arg;
+		const resolved = resolveReadPath(stripped, cwd);
+		const absolutePath = path.resolve(cwd, resolved);
+		try {
+			await fs.promises.access(absolutePath, fs.constants.R_OK);
+		} catch (err) {
+			if (isEnoent(err)) {
+				missing.push(absolutePath);
+			}
+		}
+	}
+	return missing;
+}
 /** Process @file arguments into text, document content, and image attachments */
 export async function processFileArguments(fileArgs: string[], options?: ProcessFileOptions): Promise<ProcessedFiles> {
 	const autoResizeImages = options?.autoResizeImages ?? true;

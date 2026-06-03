@@ -223,6 +223,7 @@ import {
 	SILENT_ABORT_MARKER,
 	stripImagesFromMessage,
 } from "./messages";
+import type { RuntimeReloadOptions } from "./runtime-reload";
 import { formatSessionDumpText } from "./session-dump-format";
 import type {
 	BranchSummaryEntry,
@@ -4000,6 +4001,28 @@ export class AgentSession {
 		this.#mcpPromptCommands = commands;
 	}
 
+	/**
+	 * Unified runtime reload. Each flag controls a specific surface; callers
+	 * across modes (TUI, ACP, print) pass the subset they need rather than
+	 * maintaining mode-specific reload hacks.
+	 *
+	 * MCP reconnect is NOT handled here — the session does not own the MCP
+	 * manager. Callers must disconnect/rediscover/reconnect externally and
+	 * then call {@link refreshMCPTools} and {@link setMCPPromptCommands}.
+	 */
+	async reloadRuntime(opts: RuntimeReloadOptions = {}): Promise<void> {
+		if (opts.ssh) {
+			await this.refreshSshTool({ activateIfAvailable: true });
+		}
+		if (opts.slashCommands || opts.extensions || opts.skills || opts.hooks || opts.customTools) {
+			// Invalidate discovery caches so the next tool resolution picks up
+			// newly-registered or removed tools. The caller must also refresh
+			// the slash command registry and tool registry externally (those
+			// registries live in the UI layer, not the session).
+			this.#invalidateDiscoveryCaches();
+		}
+	}
+
 	// =========================================================================
 	// Prompting
 	// =========================================================================
@@ -4127,14 +4150,9 @@ export class AgentSession {
 		// Expand file-based prompt templates if requested
 		const expandedText = expandPromptTemplates ? expandPromptTemplate(text, [...this.#promptTemplates]) : text;
 
-		// Magic keywords ("ultrathink", "orchestrate"): append hidden system notices after the
-		// user's message that steer this turn. User-authored prompts only — synthetic /
-		// agent-initiated turns never trigger them.
 		const keywordNotices: CustomMessage[] = [];
 		if (!options?.synthetic) {
 			const timestamp = Date.now();
-			const turnBudget = parseTurnBudget(expandedText);
-			this.sessionManager.beginTurnBudget(turnBudget?.total ?? null, turnBudget?.hard ?? false);
 			if (containsUltrathink(expandedText)) {
 				keywordNotices.push({
 					role: "custom",
@@ -4182,6 +4200,14 @@ export class AgentSession {
 				await this.sendCustomMessage(notice, { deliverAs: options.streamingBehavior });
 			}
 			return;
+		}
+
+		// Non-streaming: apply turn budget now that we know this turn will execute immediately.
+		// We intentionally delay this until after the streaming check: queued prompts must not
+		// overwrite the active turn's budget on the shared SessionManager.
+		if (!options?.synthetic) {
+			const turnBudget = parseTurnBudget(expandedText);
+			this.sessionManager.beginTurnBudget(turnBudget?.total ?? null, turnBudget?.hard ?? false);
 		}
 
 		// Skip eager todo prelude when the user has already queued a directive

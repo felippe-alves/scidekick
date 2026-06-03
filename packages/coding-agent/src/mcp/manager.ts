@@ -714,6 +714,10 @@ export class MCPManager {
 		this.#connections.clear();
 		this.#tools = [];
 		this.#subscribedResources.clear();
+
+		// Notify prompt consumers that all servers are gone so stale MCP prompt
+		// slash commands are rebuilt from the (now-empty) connection list.
+		this.#onPromptsChanged?.("");
 	}
 
 	/**

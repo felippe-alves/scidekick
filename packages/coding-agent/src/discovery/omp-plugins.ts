@@ -28,7 +28,13 @@ import { type Skill, skillCapability } from "../capability/skill";
 import { type SlashCommand, slashCommandCapability } from "../capability/slash-command";
 import { type CustomTool, toolCapability } from "../capability/tool";
 import type { LoadContext, LoadResult } from "../capability/types";
-import { buildRuleFromMarkdown, createSourceMeta, loadFilesFromDir, scanSkillsFromDir } from "./helpers";
+import {
+	buildRuleFromMarkdown,
+	createSourceMeta,
+	expandEnvVarsDeep,
+	loadFilesFromDir,
+	scanSkillsFromDir,
+} from "./helpers";
 import { listOmpExtensionRoots, type OmpExtensionRoot } from "./omp-extension-roots";
 
 const PROVIDER_ID = "omp-plugins";
@@ -301,6 +307,16 @@ async function loadMCPServers(ctx: LoadContext): Promise<LoadResult<MCPServer>> 
 				warnings.push(`[omp-plugins] Skipping MCP server "${serverName}" in ${mcpPath}: missing command or url`);
 				continue;
 			}
+			// Expand environment variables in config fields so plugin MCP configs
+			// behave consistently with every other MCP discovery provider.
+			if (cfg.command) cfg.command = expandEnvVarsDeep(cfg.command);
+			if (cfg.args) cfg.args = expandEnvVarsDeep(cfg.args);
+			if (cfg.env) cfg.env = expandEnvVarsDeep(cfg.env);
+			if (cfg.cwd) cfg.cwd = expandEnvVarsDeep(cfg.cwd);
+			if (cfg.url) cfg.url = expandEnvVarsDeep(cfg.url);
+			if (cfg.headers) cfg.headers = expandEnvVarsDeep(cfg.headers);
+			if (cfg.auth) cfg.auth = expandEnvVarsDeep(cfg.auth);
+			if (cfg.oauth) cfg.oauth = expandEnvVarsDeep(cfg.oauth);
 			items.push({
 				name: serverName,
 				...(cfg.enabled !== undefined && { enabled: cfg.enabled }),

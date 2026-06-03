@@ -145,6 +145,7 @@ function createRuntime() {
 			},
 			refreshCommands: () => {},
 			reloadPlugins: async () => {},
+			reloadMcp: async () => {},
 			notifyTitleChanged: undefined as (() => Promise<void> | void) | undefined,
 			notifyConfigChanged: undefined as (() => Promise<void> | void) | undefined,
 		},

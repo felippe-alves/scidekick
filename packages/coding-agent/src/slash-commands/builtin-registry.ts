@@ -1716,6 +1716,11 @@ export async function executeBuiltinSlashCommand(
 				await ctx.refreshSlashCommandState();
 				await ctx.session.refreshSshTool({ activateIfAvailable: true });
 			},
+			reloadMcp: async () => {
+				// Delegate to the TUI MCP command controller which handles
+				// disconnect / rediscover / reconnect / tool refresh end-to-end.
+				await ctx.handleMCPCommand("reload");
+			},
 		};
 		const result = await command.handle(parsed, adapted);
 		ctx.editor.setText("");

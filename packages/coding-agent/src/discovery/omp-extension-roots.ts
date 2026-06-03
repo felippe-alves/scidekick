@@ -18,6 +18,7 @@
 import * as fs from "node:fs/promises";
 import * as path from "node:path";
 import { CONFIG_DIR_NAME, isEnoent, logger, tryParseJson } from "@oh-my-pi/pi-utils";
+import { YAML } from "bun";
 import { readDirEntries, readFile } from "../capability/fs";
 import type { LoadContext } from "../capability/types";
 import { getEnabledPlugins } from "../extensibility/plugins/loader";
@@ -95,6 +96,20 @@ async function readSettingsExtensions(settingsPath: string): Promise<string[]> {
 	return raw.filter((entry): entry is string => typeof entry === "string" && entry.length > 0);
 }
 
+/** Read extensions from config.yml (current config format). Falls back gracefully. */
+async function readConfigYamlExtensions(configPath: string): Promise<string[]> {
+	const content = await readFile(configPath);
+	if (!content) return [];
+	try {
+		const parsed = YAML.parse(content);
+		if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) return [];
+		const raw = (parsed as Record<string, unknown>).extensions;
+		if (!Array.isArray(raw)) return [];
+		return raw.filter((entry): entry is string => typeof entry === "string" && entry.length > 0);
+	} catch {
+		return [];
+	}
+}
 function resolveAgainst(raw: string, ctx: LoadContext): string {
 	const tilde = expandTilde(raw, ctx.home);
 	return path.isAbsolute(tilde) ? tilde : path.resolve(ctx.cwd, tilde);
@@ -121,9 +136,11 @@ async function isDirectory(p: string): Promise<boolean> {
  * are dropped):
  *
  * 1. CLI roots injected via {@link injectOmpExtensionCliRoots}
- * 2. Project `<cwd>/.omp/settings.json#extensions`
- * 3. User `~/.omp/agent/settings.json#extensions`
- * 4. Enabled plugins installed under `<plugins>/node_modules/` (e.g. via
+ * 2. Project `<cwd>/.omp/config.yml#extensions` (current format)
+ * 3. Project `<cwd>/.omp/settings.json#extensions` (legacy)
+ * 4. User `~/.omp/agent/config.yml#extensions` (current format)
+ * 5. User `~/.omp/agent/settings.json#extensions` (legacy)
+ * 6. Enabled plugins installed under `<plugins>/node_modules/` (e.g. via
  *    `omp install <pkg>` / `omp plugin install` / `omp plugin link`)
  *
  * Only entries that resolve to a directory on disk are returned; file
@@ -134,20 +151,25 @@ async function isDirectory(p: string): Promise<boolean> {
  */
 export async function listOmpExtensionRoots(ctx: LoadContext): Promise<OmpExtensionRoot[]> {
 	const { project, user } = scopeDirs(ctx);
-	const [projectExtensions, userExtensions, installedPlugins] = await Promise.all([
-		readSettingsExtensions(path.join(project, "settings.json")),
-		readSettingsExtensions(path.join(user, "settings.json")),
-		listInstalledPluginRoots(ctx),
-	]);
+	const [projectSettingsJsonExts, userSettingsJsonExts, projectConfigYamlExts, userConfigYamlExts, installedPlugins] =
+		await Promise.all([
+			readSettingsExtensions(path.join(project, "settings.json")),
+			readSettingsExtensions(path.join(user, "settings.json")),
+			readConfigYamlExtensions(path.join(project, "config.yml")),
+			readConfigYamlExtensions(path.join(user, "config.yml")),
+			listInstalledPluginRoots(ctx),
+		]);
 
 	const candidates: InjectedRoot[] = [
 		...injectedCliRoots,
-		...projectExtensions.map((raw): InjectedRoot => ({ path: resolveAgainst(raw, ctx), level: "project" })),
-		...userExtensions.map((raw): InjectedRoot => ({ path: resolveAgainst(raw, ctx), level: "user" })),
+		...projectConfigYamlExts.map((raw): InjectedRoot => ({ path: resolveAgainst(raw, ctx), level: "project" })),
+		...projectSettingsJsonExts.map((raw): InjectedRoot => ({ path: resolveAgainst(raw, ctx), level: "project" })),
+		...userConfigYamlExts.map((raw): InjectedRoot => ({ path: resolveAgainst(raw, ctx), level: "user" })),
+		...userSettingsJsonExts.map((raw): InjectedRoot => ({ path: resolveAgainst(raw, ctx), level: "user" })),
 		...installedPlugins,
 	];
 
-	// First-seen-wins dedup preserves CLI > project-settings > user-settings > installed precedence.
+	// First-seen-wins dedup preserves CLI > project-config.yml > project-settings.json > user-config.yml > user-settings.json > installed precedence.
 	const seen = new Set<string>();
 	const unique: InjectedRoot[] = [];
 	for (const candidate of candidates) {

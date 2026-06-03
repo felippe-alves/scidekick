@@ -318,6 +318,7 @@ async function handleAddCommand(rest: string, runtime: SlashCommandRuntime): Pro
 	try {
 		const filePath = getMCPConfigPath(parsed.scope, runtime.cwd);
 		await addMCPServer(filePath, parsed.name, config);
+		await runtime.reloadMcp();
 		await runtime.output(`Added MCP server "${parsed.name}" (${parsed.scope}).`);
 		return commandConsumed();
 	} catch (err) {
@@ -432,11 +433,13 @@ async function handleEnableDisableCommand(
 		]);
 		if (projectConfig.mcpServers?.[name] !== undefined) {
 			await updateMCPServer(projectPath, name, { ...projectConfig.mcpServers[name], enabled } as MCPServerConfig);
+			await runtime.reloadMcp();
 			await runtime.output(`Server "${name}" ${enabled ? "enabled" : "disabled"} (project config).`);
 			return commandConsumed();
 		}
 		if (userConfig.mcpServers?.[name] !== undefined) {
 			await updateMCPServer(userPath, name, { ...userConfig.mcpServers[name], enabled } as MCPServerConfig);
+			await runtime.reloadMcp();
 			await runtime.output(`Server "${name}" ${enabled ? "enabled" : "disabled"} (user config).`);
 			return commandConsumed();
 		}
@@ -459,6 +462,7 @@ async function handleRemoveCommand(rest: string, runtime: SlashCommandRuntime): 
 	try {
 		const filePath = getMCPConfigPath(parsed.scope, runtime.cwd);
 		await removeMCPServer(filePath, parsed.name);
+		await runtime.reloadMcp();
 		await runtime.output(`Removed server "${parsed.name}" from ${parsed.scope} config.`);
 		return commandConsumed();
 	} catch (err) {
@@ -515,8 +519,8 @@ export async function handleMcpAcp(
 		case "smithery-search":
 			return await handleSmitherySearchCommand(rest, runtime);
 		case "reload":
-			await runtime.refreshCommands();
-			await runtime.output("MCP runtime reload requested.");
+			await runtime.reloadMcp();
+			await runtime.output("MCP runtime reloaded.");
 			return commandConsumed();
 		case "list":
 			return await handleListCommand(runtime);

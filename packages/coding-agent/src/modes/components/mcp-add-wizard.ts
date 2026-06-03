@@ -3,21 +3,12 @@
  *
  * Interactive multi-step wizard for adding MCP servers.
  */
-import {
-	Container,
-	Input,
-	matchesKey,
-	replaceTabs,
-	Spacer,
-	Text,
-	TruncatedText,
-	truncateToWidth,
-} from "@oh-my-pi/pi-tui";
+import { Container, Input, matchesKey, Spacer, Text, TruncatedText } from "@oh-my-pi/pi-tui";
 import { getMCPConfigPath, getProjectDir } from "@oh-my-pi/pi-utils";
 import { validateServerName } from "../../mcp/config-writer";
 import { analyzeAuthError, discoverOAuthEndpoints } from "../../mcp/oauth-discovery";
 import type { MCPHttpServerConfig, MCPServerConfig, MCPSseServerConfig, MCPStdioServerConfig } from "../../mcp/types";
-import { shortenPath } from "../../tools/render-utils";
+import { sanitizeForTui, shortenPath } from "../../tools/render-utils";
 import { theme } from "../theme/theme";
 import { matchesAppInterrupt, matchesSelectDown, matchesSelectUp } from "../utils/keybinding-matchers";
 import { DynamicBorder } from "./dynamic-border";
@@ -82,9 +73,9 @@ interface WizardState {
 /** Max display width for sanitized error/URL text in wizard TUI */
 const MAX_DISPLAY_WIDTH = 120;
 
-/** Sanitize a string for TUI display: replace tabs and truncate */
+/** Delegate to the shared TUI sanitizer for control-stripping, tab replacement, and truncation. */
 function sanitize(text: string): string {
-	return truncateToWidth(replaceTabs(text), MAX_DISPLAY_WIDTH);
+	return sanitizeForTui(text, MAX_DISPLAY_WIDTH);
 }
 
 export class MCPAddWizard extends Container {

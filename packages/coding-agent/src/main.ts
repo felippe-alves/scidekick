@@ -23,7 +23,7 @@ import {
 import chalk from "chalk";
 import type { Args } from "./cli/args";
 import { applyExtensionFlags, type ExtensionFlagSink } from "./cli/extension-flags";
-import { processFileArguments } from "./cli/file-processor";
+import { processFileArguments, validateFileArgs } from "./cli/file-processor";
 import { buildInitialMessage } from "./cli/initial-message";
 import { runListModelsCommand } from "./cli/list-models";
 import { selectSession } from "./cli/session-picker";
@@ -837,7 +837,16 @@ export async function runRootCommand(
 		);
 	}
 
-	// Create session manager based on CLI flags
+	// Validate @file arguments before creating a persistent session so a
+	// missing/unreadable file fails fast without leaving session artifacts.
+	if (parsedArgs.fileArgs.length > 0) {
+		const missing = await validateFileArgs(parsedArgs.fileArgs);
+		if (missing.length > 0) {
+			const list = missing.map(p => chalk.dim(path.relative(cwd, p))).join(", ");
+			process.stderr.write(`${chalk.red("Error: file not found:")} ${list}\n`);
+			process.exit(1);
+		}
+	}
 	let sessionManager = await logger.time(
 		"createSessionManager",
 		createSessionManager,

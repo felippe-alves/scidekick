@@ -379,6 +379,31 @@ function makeVirtualMatch(
 	return match;
 }
 
+/**
+ * Validate a search regex pattern against the native Rust regex dialect.
+ * Rust regex (used by ripgrep) does not support lookaround, backreferences,
+ * or other JS-only features. Reject patterns that would silently fail or
+ * produce different results across the filesystem and virtual backends.
+ */
+function validateSearchPattern(pattern: string): void {
+	// Lookbehind: (?<=…), (?<!…), or \K
+	if (/\(\?<[=!]/.test(pattern) || /\\K/.test(pattern)) {
+		throw new ToolError("Invalid regex: lookbehind is not supported");
+	}
+	// Lookahead: (?=…), (?!…)
+	if (/\(\?[=!]/.test(pattern)) {
+		throw new ToolError("Invalid regex: lookahead is not supported");
+	}
+	// Backreferences: \1 through \9, \g{…}
+	if (/\\[1-9]\d*/.test(pattern) || /\\g\{/.test(pattern)) {
+		throw new ToolError("Invalid regex: backreferences are not supported");
+	}
+	// Atomic groups / possessive quantifiers / recursive patterns
+	if (/\(\?>/.test(pattern) || /\+\+/.test(pattern) || /\?\?/.test(pattern) || /\(\?R\)/.test(pattern)) {
+		throw new ToolError("Invalid regex: unsupported extension (atomic/possessive/recursive)");
+	}
+}
+
 function compileVirtualRegex(pattern: string, ignoreCase: boolean, multiline: boolean): RegExp {
 	const flags = `${ignoreCase ? "i" : ""}${multiline ? "gm" : ""}`;
 	try {
@@ -651,6 +676,9 @@ export class SearchTool implements AgentTool<typeof searchSchema, SearchToolDeta
 			if (!normalizedPattern) {
 				throw new ToolError("Pattern must not be empty");
 			}
+			// Validate against the Rust regex dialect early so every backend
+			// (native grep and virtual resources) sees the same acceptable syntax.
+			validateSearchPattern(normalizedPattern);
 
 			const normalizedSkip = skip === undefined ? 0 : Number.isFinite(skip) ? Math.floor(skip) : Number.NaN;
 			if (normalizedSkip < 0 || !Number.isFinite(normalizedSkip)) {
