@@ -1,16 +1,35 @@
 /**
- * AgentSession - Core abstraction for agent lifecycle and session management.
+ * AgentSession — Core abstraction for agent lifecycle and session management.
  *
- * This class is shared between all run modes (interactive, print, rpc).
- * It encapsulates:
- * - Agent state access
- * - Event subscription with automatic session persistence
- * - Model and thinking level management
- * - Compaction (manual and auto)
- * - Bash execution
- * - Session switching and branching
+ * Shared between all run modes (interactive, print, rpc). Modes add their own
+ * I/O layer on top.
  *
- * Modes use this class and add their own I/O layer on top.
+ * ## Ownership & lifecycle
+ *
+ * This class is the public facade. Long-term direction is to split into
+ * narrower controllers (`TurnRunner`, `ToolRegistryController`,
+ * `CommandRegistryController`). Until then:
+ *
+ * - **Turn lifecycle**: `prompt()` owns queuing, budget application, and
+ *   delegation to the agent runtime. Budget (`beginTurnBudget`/`endTurnBudget`)
+ *   is applied only when a turn starts executing — queued prompts must not
+ *   overwrite the active turn's budget.
+ * - **Tool registry**: `refreshMCPTools()`, `refreshSshTool()`, and
+ *   `#applyActiveToolsByName` control which tools are active. Tool discovery
+ *   caches are invalidated via `#invalidateDiscoveryCaches()`.
+ * - **Slash commands**: file-based commands set via `setSlashCommands()`;
+ *   MCP prompt commands via `setMCPPromptCommands()`.
+ * - **Reload**: `reloadRuntime()` handles SSH and cache invalidation. MCP
+ *   reconnect is handled externally (session does not own the MCP manager).
+ *
+ * ## Postconditions
+ *
+ * - After `prompt()` returns: either the turn executed or was queued for
+ *   steering/follow-up delivery.
+ * - After `refreshMCPTools()`: active tool set matches the new MCP tool list
+ *   minus user-deselected names.
+ * - After `dispose()`: agent runtime, subscriptions, and session manager are
+ *   torn down.
  */
 
 import * as crypto from "node:crypto";

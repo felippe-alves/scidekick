@@ -1,8 +1,35 @@
 /**
  * MCP Server Manager.
  *
- * Discovers, connects to, and manages MCP servers.
- * Handles tool loading and lifecycle.
+ * ## Lifecycle
+ *
+ * 1. **Discover** — `loadAllMCPConfigs()` reads user/project/plugin MCP
+ *    config from `.mcp.json`, `config.yml`, and extension manifests.
+ * 2. **Connect** — `connectServers()` spawns or dials each configured server.
+ * 3. **Tools** — `getTools()` returns discovered MCP tools. Callers push
+ *    them to the session via `session.refreshMCPTools()`.
+ * 4. **Prompts** — `listPrompts()` on each connection. Callers build slash
+ *    commands via `session.setMCPPromptCommands()`.
+ * 5. **Resources** — optional; subscribe/unsubscribe via `subscribeToResources`.
+ * 6. **Disconnect** — `disconnectServer()` tears down one connection and
+ *    fires `#onPromptsChanged`. `disconnectAll()` tears down all connections
+ *    and fires `#onPromptsChanged("")` so prompt consumers clear stale
+ *    commands.
+ *
+ * ## Postconditions
+ *
+ * - After `connectServers()`: tools are available via `getTools()`, prompts
+ *   via `listPrompts()`.
+ * - After `disconnectAll()`: `#connections`, `#tools`, and `#sources` are
+ *   empty; `#onPromptsChanged` has been called.
+ * - After single `disconnectServer(name)`: `#connections`, `#tools`, and
+ *   `#sources` exclude that server; `#onPromptsChanged(name)` has been called.
+ *
+ * ## Callbacks
+ *
+ * `setOnPromptsChanged(cb)` — called after every connect/disconnect so slash
+ * command consumers can rebuild the MCP prompt command list. The callback
+ * receives the affected server name (or `""` for full disconnect).
  */
 import * as path from "node:path";
 import * as url from "node:url";

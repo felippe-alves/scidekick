@@ -64,11 +64,19 @@ export function isMCPToolName(name: string): boolean {
 	return name.startsWith("mcp__");
 }
 
-function getSchemaPropertyKeys(parameters: unknown): string[] {
+export function getSchemaPropertyKeys(parameters: unknown): string[] {
 	if (!parameters || typeof parameters !== "object" || Array.isArray(parameters)) return [];
+	// Zod schema: extract keys from object shape.
+	const zod = parameters as { type?: string; shape?: Record<string, unknown> };
+	if (zod.type === "object" && zod.shape) {
+		return Object.keys(zod.shape).sort();
+	}
+	// JSON Schema / plain MCP object: extract from properties.
 	const properties = (parameters as { properties?: unknown }).properties;
-	if (!properties || typeof properties !== "object" || Array.isArray(properties)) return [];
-	return Object.keys(properties as Record<string, unknown>).sort();
+	if (properties && typeof properties === "object" && !Array.isArray(properties)) {
+		return Object.keys(properties as Record<string, unknown>).sort();
+	}
+	return [];
 }
 
 function tokenize(value: string): string[] {

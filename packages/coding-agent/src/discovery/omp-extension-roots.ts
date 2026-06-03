@@ -1,16 +1,23 @@
 /**
  * OMP extension package roots.
  *
- * An "extension package root" is a directory configured via either
- * `extensions:` in user/project settings or the `--extension`/`-e` CLI flag
- * that points to a packaged extension on disk. The package's standard
- * sub-directories (`skills/`, `hooks/`, `tools/`, `commands/`, `rules/`,
- * `prompts/`, `.mcp.json`) are wired into discovery by `omp-plugins.ts`.
+ * An "extension package root" is a directory whose standard sub-directories
+ * (`skills/`, `hooks/`, `tools/`, `commands/`, `rules/`, `prompts/`,
+ * `.mcp.json`) are wired into discovery by `omp-plugins.ts`.
  *
- * CLI-provided paths are injected via {@link injectOmpExtensionCliRoots}
- * before discovery runs; settings paths are read lazily from
- * `<scope>/settings.json` in {@link listOmpExtensionRoots} to mirror what
- * `loadExtensionModules` already does.
+ * ## Config precedence (first-seen-wins)
+ *
+ * {@link listOmpExtensionRoots} merges these sources:
+ *
+ * 1. CLI roots injected via {@link injectOmpExtensionCliRoots}
+ * 2. Project `<cwd>/.omp/config.yml#extensions` (current format)
+ * 3. Project `<cwd>/.omp/settings.json#extensions` (legacy)
+ * 4. User `~/.omp/agent/config.yml#extensions` (current format)
+ * 5. User `~/.omp/agent/settings.json#extensions` (legacy)
+ * 6. Installed plugins under `<plugins>/node_modules/`
+ *
+ * Duplicates (same absolute path) are dropped: the first occurrence wins.
+ * Only directories are returned; file entrypoints are filtered out.
  *
  * @see ./omp-plugins.ts
  * @see ./builtin.ts `loadExtensionModules`

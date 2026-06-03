@@ -1,3 +1,41 @@
+/**
+ * Plugin Manager.
+ *
+ * ## Lifecycle
+ *
+ * 1. **Install** — `install()` resolves a spec (npm package, git URL, or
+ *    local path), installs into `<plugins>/node_modules/`, and writes
+ *    dependency metadata to the plugin `package.json`. Marketplace installs
+ *    flow through here.
+ * 2. **Link** — `link()` creates a symlink for local development. Writes
+ *    runtime config but not `package.json` dependencies. Linked plugins
+ *    appear in `list()` alongside installed ones.
+ * 3. **Activate** — the extension factory loader discovers the plugin's
+ *    directory and wires its `skills/`, `hooks/`, `tools/`, `commands/`,
+ *    `rules/`, `prompts/`, `.mcp.json` into the runtime.
+ * 4. **Contribute** — activated plugins register slash commands, custom
+ *    tools, lifecycle hooks, and MCP server configs in the session's
+ *    registries.
+ * 5. **Disable** — `disable()` flips `enabled: false` in runtime config.
+ *    The plugin's contributions should be removed on next reload. (Current
+ *    gap: reload does not yet cleanly remove disabled-plugin contributions —
+ *    see deferred plan item 10 for source-aware registries.)
+ * 6. **Uninstall / Remove** — `remove()` deletes the package from
+ *    `node_modules`, removes it from `package.json` dependencies and runtime
+ *    config. Contributions are removed on next reload.
+ *
+ * ## Postconditions
+ *
+ * - After `install()`: package exists in `node_modules`, dependency recorded
+ *   in plugin `package.json`, runtime config entry created.
+ * - After `link()`: symlink in `node_modules`, runtime config entry created
+ *   (no dependency in `package.json`).
+ * - After `remove()`: package removed from disk, dependencies, and runtime
+ *   config.
+ * - After `list()`: returns union of `package.json` dependencies AND runtime
+ *   config entries (covers both installed and linked plugins).
+ */
+
 import * as fs from "node:fs";
 import * as path from "node:path";
 import {
