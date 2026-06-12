@@ -119,9 +119,26 @@
         "@types/bun": "catalog:",
       },
     },
+    "packages/scidekick-cli": {
+      "name": "@scidekick/cli",
+      "version": "1.1.0",
+      "dependencies": {
+        "@scidekick/runtime": "workspace:*",
+      },
+      "devDependencies": {
+        "@types/bun": "catalog:",
+      },
+    },
     "packages/scidekick-guard": {
       "name": "@scidekick/guard",
       "version": "1.1.0",
+    },
+    "packages/scidekick-runtime": {
+      "name": "@scidekick/runtime",
+      "version": "1.1.0",
+      "devDependencies": {
+        "@types/bun": "catalog:",
+      },
     },
     "packages/scidekick-science": {
       "name": "@scidekick/science",
@@ -731,7 +748,11 @@
 
     "@rolldown/pluginutils": ["@rolldown/pluginutils@1.0.1", "", {}, "sha512-2j9bGt5Jh8hj+vPtgzPtl72j0yRxHAyumoo6TNfAjsLB04UtpSvPbPcDcBMxz7n+9CYB0c1GxQFxYRg2jimqGw=="],
 
+    "@scidekick/cli": ["@scidekick/cli@workspace:packages/scidekick-cli"],
+
     "@scidekick/guard": ["@scidekick/guard@workspace:packages/scidekick-guard"],
+
+    "@scidekick/runtime": ["@scidekick/runtime@workspace:packages/scidekick-runtime"],
 
     "@scidekick/science": ["@scidekick/science@workspace:packages/scidekick-science"],
 

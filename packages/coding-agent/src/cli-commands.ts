@@ -10,6 +10,7 @@
  */
 import type { CommandEntry } from "@oh-my-pi/pi-utils/cli";
 import Doctor from "./commands/doctor";
+import Research from "./commands/research";
 
 export const commands: CommandEntry[] = [
 	{ name: "launch", load: () => import("./commands/launch").then(m => m.default) },
@@ -36,6 +37,7 @@ export const commands: CommandEntry[] = [
 	{ name: "setup", load: () => import("./commands/setup").then(m => m.default) },
 	{ name: "shell", load: () => import("./commands/shell").then(m => m.default) },
 	{ name: "read", load: () => import("./commands/read").then(m => m.default) },
+	{ name: "research", load: () => Promise.resolve(Research) },
 	{ name: "ssh", load: () => import("./commands/ssh").then(m => m.default) },
 	{ name: "stats", load: () => import("./commands/stats").then(m => m.default) },
 	{ name: "update", load: () => import("./commands/update").then(m => m.default) },
